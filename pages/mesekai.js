@@ -55,42 +55,42 @@ export default function Avatar() {
                         <TabPane tab="Avatars" key="1" type="card" >
                             <Button style={{background: `url('thumbnails/avatar/xbot.png')`,
                                             backgroundPosition: 'center'}} 
-                                    onClick={updateAvatar.bind(this, "xbot")}>
+                                    onClick={updateAvatar.bind(this, "xbot.fbx")}>
                             X Bot
                             </Button>
                             <Button style={{background: `url('thumbnails/avatar/ybot.png')`,
                                             backgroundPosition: 'center'}} 
-                                    onClick={updateAvatar.bind(this, "ybot")}>
+                                    onClick={updateAvatar.bind(this, "ybot.fbx")}>
                             Y Bot
                             </Button>
                             <Button style={{background: `url('thumbnails/avatar/liam.png')`,
                                             backgroundPosition: 'center'}} 
-                                    onClick={updateAvatar.bind(this, "liam")}>
+                                    onClick={updateAvatar.bind(this, "liam.fbx")}>
                             Liam
                             </Button>
                             <Button style={{background: `url('thumbnails/avatar/malcolm.png')`,
                                             backgroundPosition: 'center'}} 
-                                    onClick={updateAvatar.bind(this, "malcolm")}>
+                                    onClick={updateAvatar.bind(this, "malcolm.fbx")}>
                             Malcolm
                             </Button>
                             <Button style={{background: `url('thumbnails/avatar/regina.png')`,
                                             backgroundPosition: 'center'}} 
-                                    onClick={updateAvatar.bind(this, "regina")}>
+                                    onClick={updateAvatar.bind(this, "regina.fbx")}>
                             Regina
                             </Button>
                             <Button style={{background: `url('thumbnails/avatar/remy.png')`,
                                             backgroundPosition: 'center'}} 
-                                    onClick={updateAvatar.bind(this, "remy")}>
+                                    onClick={updateAvatar.bind(this, "remy.fbx")}>
                             Remy
                             </Button>
                             <Button style={{background: `url('thumbnails/avatar/shae.png')`,
                                             backgroundPosition: 'center'}} 
-                                    onClick={updateAvatar.bind(this, "shae")}>
+                                    onClick={updateAvatar.bind(this, "shae.fbx")}>
                             Shae
                             </Button>
                             <Button style={{background: `url('thumbnails/avatar/stefani.png')`,
                                             backgroundPosition: 'center'}} 
-                                    onClick={updateAvatar.bind(this, "stefani")}>
+                                    onClick={updateAvatar.bind(this, "stefani.fbx")}>
                             Stefani
                             </Button>
                         </TabPane>

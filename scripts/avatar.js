@@ -50,93 +50,113 @@ let leftHandBones, rightHandBones;
 const eyelashNames = ["default", "Eyelashes", "Ch22_Eyelashes"];
 
 export async function Avatar(name, loader) {
-    let avatar = await loader.loadAsync(`/avatars/${name}.fbx`);
-    
-    // Skinned Mesh
-    let skinnedMesh = avatar.getObjectByName("Body");
+    let avatar = await loader.loadAsync(`/avatars/${name}`);
+
+    let headMeshName, bonePrefix;
+    if (name.split('.')[1] == 'fbx') {
+        // MIXAMO (only a subset)
+
+        headMeshName = "Body";
+        bonePrefix = "mixamorig";
+
+        // hide eyelashes for now cus they render weirdly
+        eyelashNames.forEach((name) => {
+            let eyelash = avatar.getObjectByName(name);
+            if (eyelash) {
+                eyelash.visible = false;
+                return;
+            }
+        });
+
+    } else if (name.split('.')[1] == 'glb') {
+        // READY PLAYER ME
+
+        avatar = avatar["scene"]["children"]["0"];
+        headMeshName = "Wolf3D_Head";
+        bonePrefix = "";
+
+        avatar.scale.setScalar(200);
+
+    } else {
+        console.log("Currently only support FBX and GLB.");
+    }
+
+    // Face
+    let skinnedMesh = avatar.getObjectByName(headMeshName);
     if (skinnedMesh) {
         morphTargets = skinnedMesh.morphTargetInfluences;
         morphDict = skinnedMesh.morphTargetDictionary;
     }
 
     // Skeleton / Bone
-    skeleton = avatar.getObjectByName("mixamorigHips");
-    spine = avatar.getObjectByName("mixamorigSpine");
-    neckBone = skeleton.getObjectByName("mixamorigHead");
+    skeleton = avatar.getObjectByName(`${bonePrefix}Hips`);
+    spine = skeleton.getObjectByName(`${bonePrefix}Spine`);
+    neckBone = skeleton.getObjectByName(`${bonePrefix}Head`);
 
-    leftShoulderBone = skeleton.getObjectByName("mixamorigRightArm");
-    leftElbowBone = leftShoulderBone.getObjectByName("mixamorigRightForeArm");
-    leftWristBone = leftElbowBone.getObjectByName("mixamorigRightHand");
-    rightShoulderBone = skeleton.getObjectByName("mixamorigLeftArm");
-    rightElbowBone = rightShoulderBone.getObjectByName("mixamorigLeftForeArm");
-    rightWristBone = rightElbowBone.getObjectByName("mixamorigLeftHand");
+    leftShoulderBone = skeleton.getObjectByName(`${bonePrefix}RightArm`);
+    leftElbowBone = leftShoulderBone.getObjectByName(`${bonePrefix}RightForeArm`);
+    leftWristBone = leftElbowBone.getObjectByName(`${bonePrefix}RightHand`);
+    rightShoulderBone = skeleton.getObjectByName(`${bonePrefix}LeftArm`);
+    rightElbowBone = rightShoulderBone.getObjectByName(`${bonePrefix}LeftForeArm`);
+    rightWristBone = rightElbowBone.getObjectByName(`${bonePrefix}LeftHand`);
 
-    leftHipBone = skeleton.getObjectByName("mixamorigRightUpLeg");
-    leftKneeBone = leftHipBone.getObjectByName("mixamorigRightLeg");
-    leftAnkleBone = leftKneeBone.getObjectByName("mixamorigRightFoot");
-    leftFootBone = leftAnkleBone.getObjectByName("mixamorigRightToe_End");
-    rightHipBone = skeleton.getObjectByName("mixamorigLeftUpLeg");
-    rightKneeBone = rightHipBone.getObjectByName("mixamorigLeftLeg");
-    rightAnkleBone = rightKneeBone.getObjectByName("mixamorigLeftFoot");
-    rightFootBone = rightAnkleBone.getObjectByName("mixamorigLeftToe_End");
+    leftHipBone = skeleton.getObjectByName(`${bonePrefix}RightUpLeg`);
+    leftKneeBone = leftHipBone.getObjectByName(`${bonePrefix}RightLeg`);
+    leftAnkleBone = leftKneeBone.getObjectByName(`${bonePrefix}RightFoot`);
+    leftFootBone = leftAnkleBone.getObjectByName(`${bonePrefix}RightToe_End`);
+    rightHipBone = skeleton.getObjectByName(`${bonePrefix}LeftUpLeg`);
+    rightKneeBone = rightHipBone.getObjectByName(`${bonePrefix}LeftLeg`);
+    rightAnkleBone = rightKneeBone.getObjectByName(`${bonePrefix}LeftFoot`);
+    rightFootBone = rightAnkleBone.getObjectByName(`${bonePrefix}LeftToe_End`);
 
     leftHandBones = [
         leftWristBone,
-        leftWristBone.getObjectByName("mixamorigRightHandThumb1"),
-        leftWristBone.getObjectByName("mixamorigRightHandThumb2"),
-        leftWristBone.getObjectByName("mixamorigRightHandThumb3"),
-        leftWristBone.getObjectByName("mixamorigRightHandThumb4"),
-        leftWristBone.getObjectByName("mixamorigRightHandIndex1"),
-        leftWristBone.getObjectByName("mixamorigRightHandIndex2"),
-        leftWristBone.getObjectByName("mixamorigRightHandIndex3"),
-        leftWristBone.getObjectByName("mixamorigRightHandIndex4"),
-        leftWristBone.getObjectByName("mixamorigRightHandMiddle1"),
-        leftWristBone.getObjectByName("mixamorigRightHandMiddle2"),
-        leftWristBone.getObjectByName("mixamorigRightHandMiddle3"),
-        leftWristBone.getObjectByName("mixamorigRightHandMiddle4"),
-        leftWristBone.getObjectByName("mixamorigRightHandRing1"),
-        leftWristBone.getObjectByName("mixamorigRightHandRing2"),
-        leftWristBone.getObjectByName("mixamorigRightHandRing3"),
-        leftWristBone.getObjectByName("mixamorigRightHandRing4"),
-        leftWristBone.getObjectByName("mixamorigRightHandPinky1"),
-        leftWristBone.getObjectByName("mixamorigRightHandPinky2"),
-        leftWristBone.getObjectByName("mixamorigRightHandPinky3"),
-        leftWristBone.getObjectByName("mixamorigRightHandPinky4")
+        leftWristBone.getObjectByName(`${bonePrefix}RightHandThumb1`),
+        leftWristBone.getObjectByName(`${bonePrefix}RightHandThumb2`),
+        leftWristBone.getObjectByName(`${bonePrefix}RightHandThumb3`),
+        leftWristBone.getObjectByName(`${bonePrefix}RightHandThumb4`),
+        leftWristBone.getObjectByName(`${bonePrefix}RightHandIndex1`),
+        leftWristBone.getObjectByName(`${bonePrefix}RightHandIndex2`),
+        leftWristBone.getObjectByName(`${bonePrefix}RightHandIndex3`),
+        leftWristBone.getObjectByName(`${bonePrefix}RightHandIndex4`),
+        leftWristBone.getObjectByName(`${bonePrefix}RightHandMiddle1`),
+        leftWristBone.getObjectByName(`${bonePrefix}RightHandMiddle2`),
+        leftWristBone.getObjectByName(`${bonePrefix}RightHandMiddle3`),
+        leftWristBone.getObjectByName(`${bonePrefix}RightHandMiddle4`),
+        leftWristBone.getObjectByName(`${bonePrefix}RightHandRing1`),
+        leftWristBone.getObjectByName(`${bonePrefix}RightHandRing2`),
+        leftWristBone.getObjectByName(`${bonePrefix}RightHandRing3`),
+        leftWristBone.getObjectByName(`${bonePrefix}RightHandRing4`),
+        leftWristBone.getObjectByName(`${bonePrefix}RightHandPinky1`),
+        leftWristBone.getObjectByName(`${bonePrefix}RightHandPinky2`),
+        leftWristBone.getObjectByName(`${bonePrefix}RightHandPinky3`),
+        leftWristBone.getObjectByName(`${bonePrefix}RightHandPinky4`)
     ]
 
     rightHandBones = [
         rightWristBone,
-        rightWristBone.getObjectByName("mixamorigLeftHandThumb1"),
-        rightWristBone.getObjectByName("mixamorigLeftHandThumb2"),
-        rightWristBone.getObjectByName("mixamorigLeftHandThumb3"),
-        rightWristBone.getObjectByName("mixamorigLeftHandThumb4"),
-        rightWristBone.getObjectByName("mixamorigLeftHandIndex1"),
-        rightWristBone.getObjectByName("mixamorigLeftHandIndex2"),
-        rightWristBone.getObjectByName("mixamorigLeftHandIndex3"),
-        rightWristBone.getObjectByName("mixamorigLeftHandIndex4"),
-        rightWristBone.getObjectByName("mixamorigLeftHandMiddle1"),
-        rightWristBone.getObjectByName("mixamorigLeftHandMiddle2"),
-        rightWristBone.getObjectByName("mixamorigLeftHandMiddle3"),
-        rightWristBone.getObjectByName("mixamorigLeftHandMiddle4"),
-        rightWristBone.getObjectByName("mixamorigLeftHandRing1"),
-        rightWristBone.getObjectByName("mixamorigLeftHandRing2"),
-        rightWristBone.getObjectByName("mixamorigLeftHandRing3"),
-        rightWristBone.getObjectByName("mixamorigLeftHandRing4"),
-        rightWristBone.getObjectByName("mixamorigLeftHandPinky1"),
-        rightWristBone.getObjectByName("mixamorigLeftHandPinky2"),
-        rightWristBone.getObjectByName("mixamorigLeftHandPinky3"),
-        rightWristBone.getObjectByName("mixamorigLeftHandPinky4")
+        rightWristBone.getObjectByName(`${bonePrefix}LeftHandThumb1`),
+        rightWristBone.getObjectByName(`${bonePrefix}LeftHandThumb2`),
+        rightWristBone.getObjectByName(`${bonePrefix}LeftHandThumb3`),
+        rightWristBone.getObjectByName(`${bonePrefix}LeftHandThumb4`),
+        rightWristBone.getObjectByName(`${bonePrefix}LeftHandIndex1`),
+        rightWristBone.getObjectByName(`${bonePrefix}LeftHandIndex2`),
+        rightWristBone.getObjectByName(`${bonePrefix}LeftHandIndex3`),
+        rightWristBone.getObjectByName(`${bonePrefix}LeftHandIndex4`),
+        rightWristBone.getObjectByName(`${bonePrefix}LeftHandMiddle1`),
+        rightWristBone.getObjectByName(`${bonePrefix}LeftHandMiddle2`),
+        rightWristBone.getObjectByName(`${bonePrefix}LeftHandMiddle3`),
+        rightWristBone.getObjectByName(`${bonePrefix}LeftHandMiddle4`),
+        rightWristBone.getObjectByName(`${bonePrefix}LeftHandRing1`),
+        rightWristBone.getObjectByName(`${bonePrefix}LeftHandRing2`),
+        rightWristBone.getObjectByName(`${bonePrefix}LeftHandRing3`),
+        rightWristBone.getObjectByName(`${bonePrefix}LeftHandRing4`),
+        rightWristBone.getObjectByName(`${bonePrefix}LeftHandPinky1`),
+        rightWristBone.getObjectByName(`${bonePrefix}LeftHandPinky2`),
+        rightWristBone.getObjectByName(`${bonePrefix}LeftHandPinky3`),
+        rightWristBone.getObjectByName(`${bonePrefix}LeftHandPinky4`)
     ]
-
-    // hide eyelashes for now cus they render weirdly
-    eyelashNames.forEach((name) => {
-        let eyelash = avatar.getObjectByName(name);
-        if (eyelash) {
-            eyelash.visible = false;
-            return;
-        }
-    });
-
+    
     avatar.traverse(function(child) {
         if (child.isMesh) {
             child.castShadow = true;
@@ -224,86 +244,86 @@ export function setPose(poseLandmarks, poseWorldLandmarks) {
         rightWristBone.quaternion.slerp(rot, SMOOTHING);
     }
 
-    // REQUIRED: both hips must be visible to track lowerbody
-    if (rightHipVis > VISTHRESH && leftHipVis > VISTHRESH) {
-        // hip local coordinate system
-        // positive directions: x - leftHip -> rightHip,
-        //                      y - hip -> shoulder,
-        //                      z - user -> camera
-        let hipX = userJoints[RIGHTHIP].clone().sub(userJoints[LEFTHIP]).normalize();
-        let hipY = userJoints[RIGHTSHOULDER].clone().lerp(userJoints[LEFTSHOULDER], 0.5).normalize();   // BUG: using shoulder Y is not accurate, but don't have better way...
-        let hipZ = hipX.clone().cross(hipY).normalize();
+    // // REQUIRED: both hips must be visible to track lowerbody
+    // if (rightHipVis > VISTHRESH && leftHipVis > VISTHRESH) {
+    //     // hip local coordinate system
+    //     // positive directions: x - leftHip -> rightHip,
+    //     //                      y - hip -> shoulder,
+    //     //                      z - user -> camera
+    //     let hipX = userJoints[RIGHTHIP].clone().sub(userJoints[LEFTHIP]).normalize();
+    //     let hipY = userJoints[RIGHTSHOULDER].clone().lerp(userJoints[LEFTSHOULDER], 0.5).normalize();   // BUG: using shoulder Y is not accurate, but don't have better way...
+    //     let hipZ = hipX.clone().cross(hipY).normalize();
 
-        // body direction
-        let thetaX = Math.acos(hipZ.x);
-        let rotY = - thetaX + Math.PI / 2;
-        smoothRotation(skeleton, 0, rotY, 0);
-        smoothRotation(spine, 0.2 * Math.PI / 2, -rotY, 0);
+    //     // body direction
+    //     let thetaX = Math.acos(hipZ.x);
+    //     let rotY = - thetaX + Math.PI / 2;
+    //     smoothRotation(skeleton, 0, rotY, 0);
+    //     smoothRotation(spine, 0.2 * Math.PI / 2, -rotY, 0);
 
-        // world position
-        let LH = new THREE.Vector3(poseLandmarks[LEFTHIP].x * WIDTH, poseLandmarks[LEFTHIP].y * HEIGHT);
-        let RH = new THREE.Vector3(poseLandmarks[RIGHTHIP].x * WIDTH, poseLandmarks[RIGHTHIP].y * HEIGHT);
+    //     // world position
+    //     let LH = new THREE.Vector3(poseLandmarks[LEFTHIP].x * WIDTH, poseLandmarks[LEFTHIP].y * HEIGHT);
+    //     let RH = new THREE.Vector3(poseLandmarks[RIGHTHIP].x * WIDTH, poseLandmarks[RIGHTHIP].y * HEIGHT);
 
-        let percentX = LH.lerp(RH, 0.5).x / WIDTH - 0.5;
-        skeleton.position.x = (1 - SMOOTHING) * skeleton.position.x + SMOOTHING * percentX * -1000;
+    //     let percentX = LH.lerp(RH, 0.5).x / WIDTH - 0.5;
+    //     skeleton.position.x = (1 - SMOOTHING) * skeleton.position.x + SMOOTHING * percentX * -1000;
 
-        // TODO: z direction movement
-        // let shoulderLen = LH.distanceTo(RH);
-        // let angleY = Math.atan2(shoulderX.z, shoulderX.x);
-        // shoulderLen /= Math.abs(Math.cos(angleY));  // BUG: division by 0
-        // let precentZ = interpolate(shoulderLen, 550, 150);
-        // skeleton.position.z = precentZ * -1000;
+    //     // TODO: z direction movement
+    //     // let shoulderLen = LH.distanceTo(RH);
+    //     // let angleY = Math.atan2(shoulderX.z, shoulderX.x);
+    //     // shoulderLen /= Math.abs(Math.cos(angleY));  // BUG: division by 0
+    //     // let precentZ = interpolate(shoulderLen, 550, 150);
+    //     // skeleton.position.z = precentZ * -1000;
 
-        // left leg
-        let xAxis = hipX.clone();
-        let yAxis = hipY.clone();
-        let zAxis = hipZ.clone();
-        let basis = new THREE.Matrix3().set(
-            xAxis.x, yAxis.x, zAxis.x,
-            xAxis.y, yAxis.y, zAxis.y,
-            xAxis.z, yAxis.z, zAxis.z
-        );
+    //     // left leg
+    //     let xAxis = hipX.clone();
+    //     let yAxis = hipY.clone();
+    //     let zAxis = hipZ.clone();
+    //     let basis = new THREE.Matrix3().set(
+    //         xAxis.x, yAxis.x, zAxis.x,
+    //         xAxis.y, yAxis.y, zAxis.y,
+    //         xAxis.z, yAxis.z, zAxis.z
+    //     );
 
-        let rot = rotateBone(userJoints[LEFTHIP], userJoints[LEFTKNEE], leftKneeBone.position, basis);
-        leftHipBone.quaternion.slerp(rot, SMOOTHING);
-        updateBasis(leftHipBone.quaternion, xAxis, yAxis, zAxis, basis);
+    //     let rot = rotateBone(userJoints[LEFTHIP], userJoints[LEFTKNEE], leftKneeBone.position, basis);
+    //     leftHipBone.quaternion.slerp(rot, SMOOTHING);
+    //     updateBasis(leftHipBone.quaternion, xAxis, yAxis, zAxis, basis);
 
-        rot = rotateBone(userJoints[LEFTKNEE], userJoints[LEFTANKLE], leftAnkleBone.position, basis);
-        leftKneeBone.quaternion.slerp(rot, SMOOTHING);
-        updateBasis(leftKneeBone.quaternion, xAxis, yAxis, zAxis, basis);
+    //     rot = rotateBone(userJoints[LEFTKNEE], userJoints[LEFTANKLE], leftAnkleBone.position, basis);
+    //     leftKneeBone.quaternion.slerp(rot, SMOOTHING);
+    //     updateBasis(leftKneeBone.quaternion, xAxis, yAxis, zAxis, basis);
 
-        rot = rotateBone(userJoints[LEFTANKLE], userJoints[LEFTFOOT], leftFootBone.position, basis);
-        leftAnkleBone.quaternion.slerp(rot, SMOOTHING);
+    //     rot = rotateBone(userJoints[LEFTANKLE], userJoints[LEFTFOOT], leftFootBone.position, basis);
+    //     leftAnkleBone.quaternion.slerp(rot, SMOOTHING);
 
-        // right leg
-        xAxis = hipX.clone();
-        yAxis = hipY.clone();
-        zAxis = hipZ.clone();
-        basis = new THREE.Matrix3().set(
-            xAxis.x, yAxis.x, zAxis.x,
-            xAxis.y, yAxis.y, zAxis.y,
-            xAxis.z, yAxis.z, zAxis.z
-        );
+    //     // right leg
+    //     xAxis = hipX.clone();
+    //     yAxis = hipY.clone();
+    //     zAxis = hipZ.clone();
+    //     basis = new THREE.Matrix3().set(
+    //         xAxis.x, yAxis.x, zAxis.x,
+    //         xAxis.y, yAxis.y, zAxis.y,
+    //         xAxis.z, yAxis.z, zAxis.z
+    //     );
 
-        rot = rotateBone(userJoints[RIGHTHIP], userJoints[RIGHTKNEE], rightKneeBone.position, basis);
-        rightHipBone.quaternion.slerp(rot, SMOOTHING);
-        updateBasis(rightHipBone.quaternion, xAxis, yAxis, zAxis, basis);
+    //     rot = rotateBone(userJoints[RIGHTHIP], userJoints[RIGHTKNEE], rightKneeBone.position, basis);
+    //     rightHipBone.quaternion.slerp(rot, SMOOTHING);
+    //     updateBasis(rightHipBone.quaternion, xAxis, yAxis, zAxis, basis);
 
-        rot = rotateBone(userJoints[RIGHTKNEE], userJoints[RIGHTANKLE], rightAnkleBone.position, basis);
-        rightKneeBone.quaternion.slerp(rot, SMOOTHING);
-        updateBasis(rightKneeBone.quaternion, xAxis, yAxis, zAxis, basis);
+    //     rot = rotateBone(userJoints[RIGHTKNEE], userJoints[RIGHTANKLE], rightAnkleBone.position, basis);
+    //     rightKneeBone.quaternion.slerp(rot, SMOOTHING);
+    //     updateBasis(rightKneeBone.quaternion, xAxis, yAxis, zAxis, basis);
 
-        rot = rotateBone(userJoints[RIGHTANKLE], userJoints[RIGHTFOOT], rightFootBone.position, basis);
-        rightAnkleBone.quaternion.slerp(rot, SMOOTHING);
-    } else {
-        // reset legs
-        leftHipBone.quaternion.identity();
-        leftKneeBone.quaternion.identity();
-        leftAnkleBone.quaternion.identity();
-        rightHipBone.quaternion.identity();
-        rightKneeBone.quaternion.identity();
-        rightAnkleBone.quaternion.identity();
-    }
+    //     rot = rotateBone(userJoints[RIGHTANKLE], userJoints[RIGHTFOOT], rightFootBone.position, basis);
+    //     rightAnkleBone.quaternion.slerp(rot, SMOOTHING);
+    // } else {
+    //     // reset legs
+    //     leftHipBone.quaternion.identity();
+    //     leftKneeBone.quaternion.identity();
+    //     leftAnkleBone.quaternion.identity();
+    //     rightHipBone.quaternion.identity();
+    //     rightKneeBone.quaternion.identity();
+    //     rightAnkleBone.quaternion.identity();
+    // }
 }
 
 export function setFingers(handLandmarks, isRight) {

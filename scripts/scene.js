@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 
 import { Avatar } from './avatar';
@@ -12,7 +13,7 @@ import { House } from './world/house';
 const canvasWidthOffset = 0.833;
 const worldDim = 2000;
 
-let renderer, camera, scene, loader, avatar, world, skyColor;
+let renderer, camera, scene, gltfLoader, fbxLoader, avatar, world, skyColor;
 let user;
 
 export async function init(canvas, currUser) {
@@ -36,10 +37,8 @@ export async function init(canvas, currUser) {
 
     // scene
     scene = new THREE.Scene();
-    loader = new FBXLoader();
-
-    let avatarName = "ybot";
-    let worldName = "grid";
+    gltfLoader = new GLTFLoader();
+    fbxLoader = new FBXLoader();
 
     // TODO: use database fields for initial avatar and world
     // if (currUser) {
@@ -63,6 +62,12 @@ export async function init(canvas, currUser) {
     //     }
     // }
 
+    //let avatarName = "ybot.fbx";
+    let avatarName = "caelen.glb";
+    let worldName = "grid";
+
+    const loader = (avatarName.split('.')[1] == 'glb') ? gltfLoader : fbxLoader;
+
     // avatar
     avatar = await Avatar(avatarName, loader);
     scene.add(avatar);
@@ -70,19 +75,19 @@ export async function init(canvas, currUser) {
     // world
     switch (worldName) {
         case "space station":
-            [world, skyColor] = Space(worldDim, loader);
+            [world, skyColor] = Space(worldDim, fbxLoader);
             break;
         case "house":
-            [world, skyColor] = House(worldDim, loader);
+            [world, skyColor] = House(worldDim, fbxLoader);
             break;
         case "castle":
-            [world, skyColor] = Castle(worldDim, loader);
+            [world, skyColor] = Castle(worldDim, fbxLoader);
             break;
         case "forest":
-            [world, skyColor] = Forest(worldDim, loader);
+            [world, skyColor] = Forest(worldDim, fbxLoader);
             break;
         default:
-            [world, skyColor] = Grid(worldDim, loader);
+            [world, skyColor] = Grid(worldDim, fbxLoader);
     }
     scene.add(world);
     scene.background = new THREE.Color(skyColor);
@@ -105,6 +110,8 @@ export async function updateAvatar(name) {
     if (avatar) {
         avatar.removeFromParent();
         avatar = null;
+
+        const loader = (name.split('.')[1] == 'glb') ? gltfLoader : fbxLoader;
 
         avatar = await Avatar(name, loader);
         scene.add(avatar);
@@ -132,19 +139,19 @@ export async function updateWorld(name) {
 
         switch (name) {
             case "space station":
-                [world, skyColor] = Space(worldDim, loader);
+                [world, skyColor] = Space(worldDim, fbxLoader);
                 break;
             case "house":
-                [world, skyColor] = House(worldDim, loader);
+                [world, skyColor] = House(worldDim, fbxLoader);
                 break;
             case "castle":
-                [world, skyColor] = Castle(worldDim, loader);
+                [world, skyColor] = Castle(worldDim, fbxLoader);
                 break;
             case "forest":
-                [world, skyColor] = Forest(worldDim, loader);
+                [world, skyColor] = Forest(worldDim, fbxLoader);
                 break;
             default:
-                [world, skyColor] = Grid(worldDim, loader);
+                [world, skyColor] = Grid(worldDim, fbxLoader);
         }
 
         scene.add(world);
