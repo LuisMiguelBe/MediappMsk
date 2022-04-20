@@ -67,7 +67,6 @@ export async function Avatar(name, loader) {
                 return;
             }
         });
-
     } else if (name.split('.')[1] == 'glb') {
         // READY PLAYER ME
 
@@ -75,8 +74,9 @@ export async function Avatar(name, loader) {
         headMeshName = "Wolf3D_Head";
         bonePrefix = "";
 
-        avatar.scale.setScalar(200);
+        console.log(avatar);
 
+        avatar.scale.setScalar(200);
     } else {
         console.log("Currently only support FBX and GLB.");
     }
@@ -207,41 +207,41 @@ export function setPose(poseLandmarks, poseWorldLandmarks) {
             xAxis.z, yAxis.z, zAxis.z
         );
 
-        let rot = rotateBone(userJoints[LEFTSHOULDER], userJoints[LEFTELBOW], leftElbowBone.position, basis);
-        leftShoulderBone.quaternion.slerp(rot, SMOOTHING);
-        updateBasis(leftShoulderBone.quaternion, xAxis, yAxis, zAxis, basis);
+        // let rot = rotateBone(userJoints[LEFTSHOULDER], userJoints[LEFTELBOW], leftElbowBone.position, basis);
+        // leftShoulderBone.quaternion.slerp(rot, SMOOTHING);
+        // updateBasis(leftShoulderBone.quaternion, xAxis, yAxis, zAxis, basis);
 
-        rot = rotateBone(userJoints[LEFTELBOW], userJoints[LEFTWRIST], leftWristBone.position, basis);
-        leftElbowBone.quaternion.slerp(rot, SMOOTHING);
-        updateBasis(leftElbowBone.quaternion, xAxis, yAxis, zAxis, basis);
+        // rot = rotateBone(userJoints[LEFTELBOW], userJoints[LEFTWRIST], leftWristBone.position, basis);
+        // leftElbowBone.quaternion.slerp(rot, SMOOTHING);
+        // updateBasis(leftElbowBone.quaternion, xAxis, yAxis, zAxis, basis);
 
-        let leftFingersUser = userJoints[LEFTPINKY].lerp(userJoints[LEFTINDEX], 0.5);
-        let leftFingersAvatar = leftHandBones[PINKY1].position.clone().lerp(leftHandBones[INDEX1].position, 0.5);
-        rot = rotateBone(userJoints[LEFTWRIST], leftFingersUser, leftFingersAvatar, basis);
-        leftWristBone.quaternion.slerp(rot, SMOOTHING);
+        // let leftFingersUser = userJoints[LEFTPINKY].lerp(userJoints[LEFTINDEX], 0.5);
+        // let leftFingersAvatar = leftHandBones[PINKY1].position.clone().lerp(leftHandBones[INDEX1].position, 0.5);
+        // rot = rotateBone(userJoints[LEFTWRIST], leftFingersUser, leftFingersAvatar, basis);
+        // leftWristBone.quaternion.slerp(rot, SMOOTHING);
 
-        // right arm
-        xAxis = shoulderX.clone();
-        yAxis = shoulderY.clone();
-        zAxis = shoulderZ.clone();
-        basis = new THREE.Matrix3().set(
-            xAxis.x, yAxis.x, zAxis.x,
-            xAxis.y, yAxis.y, zAxis.y,
-            xAxis.z, yAxis.z, zAxis.z
-        );
+        // // right arm
+        // xAxis = shoulderX.clone();
+        // yAxis = shoulderY.clone();
+        // zAxis = shoulderZ.clone();
+        // basis = new THREE.Matrix3().set(
+        //     xAxis.x, yAxis.x, zAxis.x,
+        //     xAxis.y, yAxis.y, zAxis.y,
+        //     xAxis.z, yAxis.z, zAxis.z
+        // );
 
-        rot = rotateBone(userJoints[RIGHTSHOULDER], userJoints[RIGHTELBOW], rightElbowBone.position, basis);
-        rightShoulderBone.quaternion.slerp(rot, SMOOTHING);
-        updateBasis(rightShoulderBone.quaternion, xAxis, yAxis, zAxis, basis);
+        // rot = rotateBone(userJoints[RIGHTSHOULDER], userJoints[RIGHTELBOW], rightElbowBone.position, basis);
+        // rightShoulderBone.quaternion.slerp(rot, SMOOTHING);
+        // updateBasis(rightShoulderBone.quaternion, xAxis, yAxis, zAxis, basis);
 
-        rot = rotateBone(userJoints[RIGHTELBOW], userJoints[RIGHTWRIST], rightWristBone.position, basis);
-        rightElbowBone.quaternion.slerp(rot, SMOOTHING);
-        updateBasis(rightElbowBone.quaternion, xAxis, yAxis, zAxis, basis);
+        // rot = rotateBone(userJoints[RIGHTELBOW], userJoints[RIGHTWRIST], rightWristBone.position, basis);
+        // rightElbowBone.quaternion.slerp(rot, SMOOTHING);
+        // updateBasis(rightElbowBone.quaternion, xAxis, yAxis, zAxis, basis);
 
-        let rightFingersUser = userJoints[RIGHTPINKY].lerp(userJoints[RIGHTINDEX], 0.5);
-        let rightFingersAvatar = rightHandBones[PINKY1].position.clone().lerp(rightHandBones[INDEX1].position, 0.5);
-        rot = rotateBone(userJoints[RIGHTWRIST], rightFingersUser, rightFingersAvatar, basis);
-        rightWristBone.quaternion.slerp(rot, SMOOTHING);
+        // let rightFingersUser = userJoints[RIGHTPINKY].lerp(userJoints[RIGHTINDEX], 0.5);
+        // let rightFingersAvatar = rightHandBones[PINKY1].position.clone().lerp(rightHandBones[INDEX1].position, 0.5);
+        // rot = rotateBone(userJoints[RIGHTWRIST], rightFingersUser, rightFingersAvatar, basis);
+        // rightWristBone.quaternion.slerp(rot, SMOOTHING);
     }
 
     // // REQUIRED: both hips must be visible to track lowerbody
