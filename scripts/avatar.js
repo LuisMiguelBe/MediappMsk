@@ -198,18 +198,21 @@ export function setPose(poseLandmarks, poseWorldLandmarks) {
         smoothRotation(spine, rotX, rotY, rotZ);
 
         // left arm
-        let xAxis = shoulderX.clone();
-        let yAxis = shoulderY.clone();
-        let zAxis = shoulderZ.clone();
+        // let xAxis = shoulderX.clone();
+        // let yAxis = shoulderY.clone();
+        // let zAxis = shoulderZ.clone();
+        let xAxis = shoulderZ.clone();
+        let yAxis = shoulderX.clone().negate();
+        let zAxis = shoulderY.clone().negate();
         let basis = new THREE.Matrix3().set(
             xAxis.x, yAxis.x, zAxis.x,
             xAxis.y, yAxis.y, zAxis.y,
             xAxis.z, yAxis.z, zAxis.z
         );
 
-        // let rot = rotateBone(userJoints[LEFTSHOULDER], userJoints[LEFTELBOW], leftElbowBone.position, basis);
-        // leftShoulderBone.quaternion.slerp(rot, SMOOTHING);
-        // updateBasis(leftShoulderBone.quaternion, xAxis, yAxis, zAxis, basis);
+        let rot = rotateBone(userJoints[LEFTSHOULDER], userJoints[LEFTELBOW], leftElbowBone.position, basis);
+        leftShoulderBone.quaternion.slerp(rot, SMOOTHING);
+        updateBasis(leftShoulderBone.quaternion, xAxis, yAxis, zAxis, basis);
 
         // rot = rotateBone(userJoints[LEFTELBOW], userJoints[LEFTWRIST], leftWristBone.position, basis);
         // leftElbowBone.quaternion.slerp(rot, SMOOTHING);
@@ -220,10 +223,13 @@ export function setPose(poseLandmarks, poseWorldLandmarks) {
         // rot = rotateBone(userJoints[LEFTWRIST], leftFingersUser, leftFingersAvatar, basis);
         // leftWristBone.quaternion.slerp(rot, SMOOTHING);
 
-        // // right arm
+        // right arm
         // xAxis = shoulderX.clone();
         // yAxis = shoulderY.clone();
         // zAxis = shoulderZ.clone();
+        // xAxis = shoulderZ.clone();
+        // yAxis = shoulderX.clone().negate();
+        // zAxis = shoulderY.clone().negate();
         // basis = new THREE.Matrix3().set(
         //     xAxis.x, yAxis.x, zAxis.x,
         //     xAxis.y, yAxis.y, zAxis.y,
@@ -537,7 +543,7 @@ function smoothRotation(object, rotX, rotY, rotZ) {
 // userChild (Vector3) - world position of child of joint
 // avatarChild (Vector3) - local position of child Bone of joint
 // basis (Matrix3) - local axes at joint (in world coordinates)
-// returns rotation needed at joing
+// returns rotation needed at joint
 function rotateBone(userJoint, userChild, avatarChild, basis) {
     // change of basis: world -> local
     let userLimb = userChild.clone().sub(userJoint).applyMatrix3(basis.invert()).normalize();

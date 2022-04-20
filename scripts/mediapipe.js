@@ -30,12 +30,12 @@ export function PoseDetector(preload, videoInput) {
     
         let leftHandLandmarks = results.leftHandLandmarks;
         if (leftHandLandmarks) {
-            setFingers(leftHandLandmarks, false);
+            //setFingers(leftHandLandmarks, false);
         }
     
         let rightHandLandmarks = results.rightHandLandmarks;
         if (rightHandLandmarks) {
-            setFingers(rightHandLandmarks, true);
+            //setFingers(rightHandLandmarks, true);
         }
     
         let faceLandmarks = results.faceLandmarks;
