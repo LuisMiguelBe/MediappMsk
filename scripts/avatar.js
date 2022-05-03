@@ -48,6 +48,7 @@ let leftHipBone, leftKneeBone, leftAnkleBone, leftFootBone, rightHipBone, rightK
 let leftHandBones, rightHandBones;
 
 const eyelashNames = ["default", "Eyelashes", "Ch22_Eyelashes"];
+let isMixamo = false;
 
 export async function Avatar(name, loader) {
     let avatar = await loader.loadAsync(`/avatars/${name}`);
@@ -55,6 +56,7 @@ export async function Avatar(name, loader) {
     let headMeshName, bonePrefix;
     if (name.split('.')[1] == 'fbx') {
         // MIXAMO (only a subset)
+        isMixamo = true;
 
         headMeshName = "Body";
         bonePrefix = "mixamorig";
@@ -69,12 +71,9 @@ export async function Avatar(name, loader) {
         });
     } else if (name.split('.')[1] == 'glb') {
         // READY PLAYER ME
-
         avatar = avatar["scene"]["children"]["0"];
         headMeshName = "Wolf3D_Head";
         bonePrefix = "";
-
-        console.log(avatar);
 
         avatar.scale.setScalar(200);
     } else {
@@ -441,18 +440,6 @@ export function setMorphs(faceLandmarks) {
     xAxis.normalize();
     xAxis.negate();
 
-    // face plane local coordinates (pX, pY)
-    let facePos = [];
-    for (let landmark of faceLandmarks) {
-        let p = new THREE.Vector3(landmark.x * WIDTH, landmark.y * HEIGHT, landmark.z * WIDTH);
-
-        // project point onto face plane
-        v = p.sub(pN);
-        let pX = xAxis.dot(v) / faceLenX;
-        let pY = yAxis.dot(v) / faceLenY;
-        facePos.push([pX, pY]);
-    }
-
     // gaze direction
     let thetaX = Math.acos(zAxis.x);
     let thetaY = Math.acos(zAxis.y);
@@ -462,72 +449,108 @@ export function setMorphs(faceLandmarks) {
     let rotZ = -(thetaZ - Math.PI / 2);
     smoothRotation(neckBone, rotX, rotY, rotZ);
 
-    // CALCULATE MORPHS
+    if (isMixamo) {
+        // face plane local coordinates (pX, pY)
+        let facePos = [];
+        for (let landmark of faceLandmarks) {
+            let p = new THREE.Vector3(landmark.x * WIDTH, landmark.y * HEIGHT, landmark.z * WIDTH);
 
-    // eyes
-    let eyeRT = facePos[27];
-    let eyeRB = facePos[23];
-    let eyeLT = facePos[257];
-    let eyeLB = facePos[253];
+            // project point onto face plane
+            v = p.sub(pN);
+            let pX = xAxis.dot(v) / faceLenX;
+            let pY = yAxis.dot(v) / faceLenY;
+            facePos.push([pX, pY]);
+        }
 
-    let min = 0.1;
-    let max = 0.12;
-    setMorphTarget("EyesWide_Left", interpolate(eyeRT[1] - eyeRB[1], min, max));
-    setMorphTarget("EyesWide_Right", interpolate(eyeLT[1] - eyeLB[1], min, max));
+        // CALCULATE MORPHS
 
-    max = 0.095;
-    setMorphTarget("Squint_Left", interpolate(eyeRT[1] - eyeRB[1], min, max));
-    setMorphTarget("Squint_Right", interpolate(eyeLT[1] - eyeLB[1], min, max));
+        // eyes
+        let eyeRT = facePos[27];
+        let eyeRB = facePos[23];
+        let eyeLT = facePos[257];
+        let eyeLB = facePos[253];
 
-    max = 0.09;
-    setMorphTarget("Blink_Left", interpolate(eyeRT[1] - eyeRB[1], min, max));
-    setMorphTarget("Blink_Right", interpolate(eyeLT[1] - eyeLB[1], min, max));
+        let min = 0.1;
+        let max = 0.12;
+        setMorphTarget("EyesWide_Left", interpolate(eyeRT[1] - eyeRB[1], min, max));
+        setMorphTarget("EyesWide_Right", interpolate(eyeLT[1] - eyeLB[1], min, max));
 
-    // eyebrows
-    let browR = facePos[66];
-    let browL = facePos[296];
+        max = 0.095;
+        setMorphTarget("Squint_Left", interpolate(eyeRT[1] - eyeRB[1], min, max));
+        setMorphTarget("Squint_Right", interpolate(eyeLT[1] - eyeLB[1], min, max));
 
-    min = 0.35;
-    max = 0.4;
-    setMorphTarget("BrowsUp_Left", interpolate(browR[1], min, max));
-    setMorphTarget("BrowsUp_Right", interpolate(browL[1], min, max));
+        max = 0.09;
+        setMorphTarget("Blink_Left", interpolate(eyeRT[1] - eyeRB[1], min, max));
+        setMorphTarget("Blink_Right", interpolate(eyeLT[1] - eyeLB[1], min, max));
 
-    max = 0.33;
-    setMorphTarget("BrowsDown_Left", interpolate(browR[1], min, max));
-    setMorphTarget("BrowsDown_Right", interpolate(browL[1], min, max));
+        // eyebrows
+        let browR = facePos[66];
+        let browL = facePos[296];
 
-    // mouth
-    let mouthT = facePos[13];
-    let mouthB = facePos[14];
-    let mouthL = facePos[308];
-    let mouthR = facePos[78];
+        min = 0.35;
+        max = 0.4;
+        setMorphTarget("BrowsUp_Left", interpolate(browR[1], min, max));
+        setMorphTarget("BrowsUp_Right", interpolate(browL[1], min, max));
 
-    min = 0.01;
-    max = 0.15;
-    setMorphTarget("MouthOpen", interpolate(mouthT[1] - mouthB[1], min, max));
+        max = 0.33;
+        setMorphTarget("BrowsDown_Left", interpolate(browR[1], min, max));
+        setMorphTarget("BrowsDown_Right", interpolate(browL[1], min, max));
 
-    min = -0.15;
-    max = -0.11;
-    setMorphTarget("Midmouth_Right", interpolate(mouthR[0], min, max));
-    setMorphTarget("Midmouth_Left", interpolate(mouthL[0], -min, -max));
+        // mouth
+        let mouthT = facePos[13];
+        let mouthB = facePos[14];
+        let mouthL = facePos[308];
+        let mouthR = facePos[78];
 
-    min = -0.22;
-    max = -0.25;
-    setMorphTarget("Frown_Left", interpolate(mouthR[1], min, max));
-    setMorphTarget("Frown_Right", interpolate(mouthL[1], min, max));
+        min = 0.01;
+        max = 0.15;
+        setMorphTarget("MouthOpen", interpolate(mouthT[1] - mouthB[1], min, max));
 
-    max = -0.18;
-    setMorphTarget("Smile_Left", interpolate(mouthR[1], min, max));
-    setMorphTarget("Smile_Right", interpolate(mouthL[1], min, max));
+        min = -0.15;
+        max = -0.11;
+        setMorphTarget("Midmouth_Right", interpolate(mouthR[0], min, max));
+        setMorphTarget("Midmouth_Left", interpolate(mouthL[0], -min, -max));
 
-    // nose
-    let noseR = facePos[129];
-    let noseL = facePos[358];
+        min = -0.22;
+        max = -0.25;
+        setMorphTarget("Frown_Left", interpolate(mouthR[1], min, max));
+        setMorphTarget("Frown_Right", interpolate(mouthL[1], min, max));
 
-    min = -0.027;
-    max = -0.018;
-    setMorphTarget("NoseScrunch_Left", interpolate(noseR[1], min, max));
-    setMorphTarget("NoseScrunch_Right", interpolate(noseL[1], min, max));
+        max = -0.18;
+        setMorphTarget("Smile_Left", interpolate(mouthR[1], min, max));
+        setMorphTarget("Smile_Right", interpolate(mouthL[1], min, max));
+
+        // nose
+        let noseR = facePos[129];
+        let noseL = facePos[358];
+
+        min = -0.027;
+        max = -0.018;
+        setMorphTarget("NoseScrunch_Left", interpolate(noseR[1], min, max));
+        setMorphTarget("NoseScrunch_Right", interpolate(noseL[1], min, max));
+    }
+}
+
+export function setBlendshapes(blendshapeDict) {
+    for (const [key, value] of blendshapeDict) {
+        let blendshape = key;
+
+        let tokens = key.split("_");
+        if (tokens.length > 1) {
+            switch (tokens[1]) {
+                case "L":
+                    blendshape = tokens[0] + 'Right';
+                    break;
+                case "R":
+                    blendshape = tokens[0] + 'Left';
+                    break;
+                default:
+                    console.log("Unknown Blendshape");
+            }
+        }
+
+        morphTargets[morphDict[blendshape]] = value;
+    }
 }
 
 // motion smoothing rotation of object by x, y, z

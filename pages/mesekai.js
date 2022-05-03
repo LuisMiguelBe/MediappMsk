@@ -36,8 +36,8 @@ export default function Avatar() {
             detector.close();
 
             const tracks = camera.video.srcObject.getTracks();
-            tracks.forEach(function (track) {
-            track.stop();
+            tracks.forEach((track) => {
+                track.stop();
             });
             camera.video.srcObject = null;
 
