@@ -6,7 +6,7 @@ export default function Landing() {
         <div id="base">
             <div id="Title">Mesekai</div>
             <div id="desc">
-                Step into a virtual world with just a webcam!
+                Webcam Motion Tracking Virtual Avatar
             </div>
             <div id="button-middle">
                 <Image src="/misc/front-page-char.png" width="1276px" height="859px"/>
