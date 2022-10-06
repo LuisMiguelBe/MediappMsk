@@ -1,8 +1,10 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import { Avatar } from './avatar';
+import { retarget } from './retarget';
 import { Grid } from './world/grid';
 import { Forest } from './world/forest';
 import { Castle } from './world/castle';
@@ -12,7 +14,7 @@ import { House } from './world/house';
 const canvasWidthOffset = 0.833;
 const worldDim = 2000;
 
-let renderer, camera, scene, loader, avatar, world, skyColor;
+let renderer, camera, scene, loader, mixamoAvatar, rpmAvatar, world, skyColor;
 let user;
 
 export async function init(canvas, currUser) {
@@ -63,9 +65,18 @@ export async function init(canvas, currUser) {
     //     }
     // }
 
-    // avatar
-    avatar = await Avatar(avatarName, loader);
-    scene.add(avatar);
+    // src avatar
+    mixamoAvatar = await Avatar(avatarName, loader);
+    mixamoAvatar.translateX(-100);
+    scene.add(mixamoAvatar);
+
+    // tgt avatar
+    let gltfLoader = new GLTFLoader();
+    rpmAvatar = await gltfLoader.loadAsync('/avatars/caelen.glb');
+    rpmAvatar = rpmAvatar["scene"]["children"]["0"];
+    rpmAvatar.scale.setScalar(200);
+    rpmAvatar.translateX(100);
+    scene.add(rpmAvatar);
 
     // world
     switch (worldName) {
@@ -95,6 +106,8 @@ function onWindowResize() {
 }
 
 export function animate() {
+    if (rpmAvatar != null) retarget(rpmAvatar);
+
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
 }
@@ -102,12 +115,12 @@ export function animate() {
 // BUG: choosing a different avatar before current avatar has loaded does not override selection
 // button UI overrides, avatar model should too
 export async function updateAvatar(name) {
-    if (avatar) {
-        avatar.removeFromParent();
-        avatar = null;
+    if (mixamoAvatar) {
+        mixamoAvatar.removeFromParent();
+        mixamoAvatar = null;
 
-        avatar = await Avatar(name, loader);
-        scene.add(avatar);
+        mixamoAvatar = await Avatar(name, loader);
+        scene.add(mixamoAvatar);
 
         if (user) {
             const res = await fetch('api/update-avatar', {

@@ -42,10 +42,10 @@ const RIGHT = 234;     // right most point
 const TOP = 10;        // top most point                       
 const BOT = 152;       // bot most point
 
-let skeleton, spine, neckBone, morphTargets, morphDict;
-let leftShoulderBone, leftElbowBone, leftWristBone, rightShoulderBone, rightElbowBone, rightWristBone;
-let leftHipBone, leftKneeBone, leftAnkleBone, leftFootBone, rightHipBone, rightKneeBone, rightAnkleBone, rightFootBone;
-let leftHandBones, rightHandBones;
+export let skeleton, spine, neckBone, morphTargets, morphDict;
+export let leftShoulderBone, leftElbowBone, leftWristBone, rightShoulderBone, rightElbowBone, rightWristBone;
+export let leftHipBone, leftKneeBone, leftAnkleBone, leftFootBone, rightHipBone, rightKneeBone, rightAnkleBone, rightFootBone;
+export let leftHandBones, rightHandBones;
 
 const eyelashNames = ["default", "Eyelashes", "Ch22_Eyelashes"];
 
