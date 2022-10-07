@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { Vector3 } from 'three';
 
 // device constants
 const WIDTH = 1920;
@@ -42,10 +43,12 @@ const RIGHT = 234;     // right most point
 const TOP = 10;        // top most point                       
 const BOT = 152;       // bot most point
 
-let skeleton, spine, neckBone, morphTargets, morphDict;
-let leftShoulderBone, leftElbowBone, leftWristBone, rightShoulderBone, rightElbowBone, rightWristBone;
-let leftHipBone, leftKneeBone, leftAnkleBone, leftFootBone, rightHipBone, rightKneeBone, rightAnkleBone, rightFootBone;
-let leftHandBones, rightHandBones;
+let skeleton, spine, neck, morphTargets, morphDict;
+let leftShoulder, leftElbow, leftWrist, rightShoulder, rightElbow, rightWrist;
+let leftHip, leftKnee, leftAnkle, leftFoot, rightHip, rightKnee, rightAnkle, rightFoot;
+let leftHands, rightHands;
+
+let prevLShoulderRot, prevLElbowRot, prevLWristRot;
 
 const eyelashNames = ["default", "Eyelashes", "Ch22_Eyelashes"];
 let isMixamo = false;
@@ -87,75 +90,79 @@ export async function Avatar(name, loader) {
         morphDict = skinnedMesh.morphTargetDictionary;
     }
 
-    // Skeleton / Bone
+    // Skeleton
     skeleton = avatar.getObjectByName(`${bonePrefix}Hips`);
     spine = skeleton.getObjectByName(`${bonePrefix}Spine`);
-    neckBone = skeleton.getObjectByName(`${bonePrefix}Head`);
+    neck = skeleton.getObjectByName(`${bonePrefix}Head`);
 
-    leftShoulderBone = skeleton.getObjectByName(`${bonePrefix}RightArm`);
-    leftElbowBone = leftShoulderBone.getObjectByName(`${bonePrefix}RightForeArm`);
-    leftWristBone = leftElbowBone.getObjectByName(`${bonePrefix}RightHand`);
-    rightShoulderBone = skeleton.getObjectByName(`${bonePrefix}LeftArm`);
-    rightElbowBone = rightShoulderBone.getObjectByName(`${bonePrefix}LeftForeArm`);
-    rightWristBone = rightElbowBone.getObjectByName(`${bonePrefix}LeftHand`);
+    leftShoulder = skeleton.getObjectByName(`${bonePrefix}RightArm`);
+    leftElbow = leftShoulder.getObjectByName(`${bonePrefix}RightForeArm`);
+    leftWrist = leftElbow.getObjectByName(`${bonePrefix}RightHand`);
+    rightShoulder = skeleton.getObjectByName(`${bonePrefix}LeftArm`);
+    rightElbow = rightShoulder.getObjectByName(`${bonePrefix}LeftForeArm`);
+    rightWrist = rightElbow.getObjectByName(`${bonePrefix}LeftHand`);
 
-    leftHipBone = skeleton.getObjectByName(`${bonePrefix}RightUpLeg`);
-    leftKneeBone = leftHipBone.getObjectByName(`${bonePrefix}RightLeg`);
-    leftAnkleBone = leftKneeBone.getObjectByName(`${bonePrefix}RightFoot`);
-    leftFootBone = leftAnkleBone.getObjectByName(`${bonePrefix}RightToe_End`);
-    rightHipBone = skeleton.getObjectByName(`${bonePrefix}LeftUpLeg`);
-    rightKneeBone = rightHipBone.getObjectByName(`${bonePrefix}LeftLeg`);
-    rightAnkleBone = rightKneeBone.getObjectByName(`${bonePrefix}LeftFoot`);
-    rightFootBone = rightAnkleBone.getObjectByName(`${bonePrefix}LeftToe_End`);
+    leftHip = skeleton.getObjectByName(`${bonePrefix}RightUpLeg`);
+    leftKnee = leftHip.getObjectByName(`${bonePrefix}RightLeg`);
+    leftAnkle = leftKnee.getObjectByName(`${bonePrefix}RightFoot`);
+    leftFoot = leftAnkle.getObjectByName(`${bonePrefix}RightToe_End`);
+    rightHip = skeleton.getObjectByName(`${bonePrefix}LeftUpLeg`);
+    rightKnee = rightHip.getObjectByName(`${bonePrefix}LeftLeg`);
+    rightAnkle = rightKnee.getObjectByName(`${bonePrefix}LeftFoot`);
+    rightFoot = rightAnkle.getObjectByName(`${bonePrefix}LeftToe_End`);
 
-    leftHandBones = [
-        leftWristBone,
-        leftWristBone.getObjectByName(`${bonePrefix}RightHandThumb1`),
-        leftWristBone.getObjectByName(`${bonePrefix}RightHandThumb2`),
-        leftWristBone.getObjectByName(`${bonePrefix}RightHandThumb3`),
-        leftWristBone.getObjectByName(`${bonePrefix}RightHandThumb4`),
-        leftWristBone.getObjectByName(`${bonePrefix}RightHandIndex1`),
-        leftWristBone.getObjectByName(`${bonePrefix}RightHandIndex2`),
-        leftWristBone.getObjectByName(`${bonePrefix}RightHandIndex3`),
-        leftWristBone.getObjectByName(`${bonePrefix}RightHandIndex4`),
-        leftWristBone.getObjectByName(`${bonePrefix}RightHandMiddle1`),
-        leftWristBone.getObjectByName(`${bonePrefix}RightHandMiddle2`),
-        leftWristBone.getObjectByName(`${bonePrefix}RightHandMiddle3`),
-        leftWristBone.getObjectByName(`${bonePrefix}RightHandMiddle4`),
-        leftWristBone.getObjectByName(`${bonePrefix}RightHandRing1`),
-        leftWristBone.getObjectByName(`${bonePrefix}RightHandRing2`),
-        leftWristBone.getObjectByName(`${bonePrefix}RightHandRing3`),
-        leftWristBone.getObjectByName(`${bonePrefix}RightHandRing4`),
-        leftWristBone.getObjectByName(`${bonePrefix}RightHandPinky1`),
-        leftWristBone.getObjectByName(`${bonePrefix}RightHandPinky2`),
-        leftWristBone.getObjectByName(`${bonePrefix}RightHandPinky3`),
-        leftWristBone.getObjectByName(`${bonePrefix}RightHandPinky4`)
+    leftHands = [
+        leftWrist,
+        leftWrist.getObjectByName(`${bonePrefix}RightHandThumb1`),
+        leftWrist.getObjectByName(`${bonePrefix}RightHandThumb2`),
+        leftWrist.getObjectByName(`${bonePrefix}RightHandThumb3`),
+        leftWrist.getObjectByName(`${bonePrefix}RightHandThumb4`),
+        leftWrist.getObjectByName(`${bonePrefix}RightHandIndex1`),
+        leftWrist.getObjectByName(`${bonePrefix}RightHandIndex2`),
+        leftWrist.getObjectByName(`${bonePrefix}RightHandIndex3`),
+        leftWrist.getObjectByName(`${bonePrefix}RightHandIndex4`),
+        leftWrist.getObjectByName(`${bonePrefix}RightHandMiddle1`),
+        leftWrist.getObjectByName(`${bonePrefix}RightHandMiddle2`),
+        leftWrist.getObjectByName(`${bonePrefix}RightHandMiddle3`),
+        leftWrist.getObjectByName(`${bonePrefix}RightHandMiddle4`),
+        leftWrist.getObjectByName(`${bonePrefix}RightHandRing1`),
+        leftWrist.getObjectByName(`${bonePrefix}RightHandRing2`),
+        leftWrist.getObjectByName(`${bonePrefix}RightHandRing3`),
+        leftWrist.getObjectByName(`${bonePrefix}RightHandRing4`),
+        leftWrist.getObjectByName(`${bonePrefix}RightHandPinky1`),
+        leftWrist.getObjectByName(`${bonePrefix}RightHandPinky2`),
+        leftWrist.getObjectByName(`${bonePrefix}RightHandPinky3`),
+        leftWrist.getObjectByName(`${bonePrefix}RightHandPinky4`)
     ]
 
-    rightHandBones = [
-        rightWristBone,
-        rightWristBone.getObjectByName(`${bonePrefix}LeftHandThumb1`),
-        rightWristBone.getObjectByName(`${bonePrefix}LeftHandThumb2`),
-        rightWristBone.getObjectByName(`${bonePrefix}LeftHandThumb3`),
-        rightWristBone.getObjectByName(`${bonePrefix}LeftHandThumb4`),
-        rightWristBone.getObjectByName(`${bonePrefix}LeftHandIndex1`),
-        rightWristBone.getObjectByName(`${bonePrefix}LeftHandIndex2`),
-        rightWristBone.getObjectByName(`${bonePrefix}LeftHandIndex3`),
-        rightWristBone.getObjectByName(`${bonePrefix}LeftHandIndex4`),
-        rightWristBone.getObjectByName(`${bonePrefix}LeftHandMiddle1`),
-        rightWristBone.getObjectByName(`${bonePrefix}LeftHandMiddle2`),
-        rightWristBone.getObjectByName(`${bonePrefix}LeftHandMiddle3`),
-        rightWristBone.getObjectByName(`${bonePrefix}LeftHandMiddle4`),
-        rightWristBone.getObjectByName(`${bonePrefix}LeftHandRing1`),
-        rightWristBone.getObjectByName(`${bonePrefix}LeftHandRing2`),
-        rightWristBone.getObjectByName(`${bonePrefix}LeftHandRing3`),
-        rightWristBone.getObjectByName(`${bonePrefix}LeftHandRing4`),
-        rightWristBone.getObjectByName(`${bonePrefix}LeftHandPinky1`),
-        rightWristBone.getObjectByName(`${bonePrefix}LeftHandPinky2`),
-        rightWristBone.getObjectByName(`${bonePrefix}LeftHandPinky3`),
-        rightWristBone.getObjectByName(`${bonePrefix}LeftHandPinky4`)
+    rightHands = [
+        rightWrist,
+        rightWrist.getObjectByName(`${bonePrefix}LeftHandThumb1`),
+        rightWrist.getObjectByName(`${bonePrefix}LeftHandThumb2`),
+        rightWrist.getObjectByName(`${bonePrefix}LeftHandThumb3`),
+        rightWrist.getObjectByName(`${bonePrefix}LeftHandThumb4`),
+        rightWrist.getObjectByName(`${bonePrefix}LeftHandIndex1`),
+        rightWrist.getObjectByName(`${bonePrefix}LeftHandIndex2`),
+        rightWrist.getObjectByName(`${bonePrefix}LeftHandIndex3`),
+        rightWrist.getObjectByName(`${bonePrefix}LeftHandIndex4`),
+        rightWrist.getObjectByName(`${bonePrefix}LeftHandMiddle1`),
+        rightWrist.getObjectByName(`${bonePrefix}LeftHandMiddle2`),
+        rightWrist.getObjectByName(`${bonePrefix}LeftHandMiddle3`),
+        rightWrist.getObjectByName(`${bonePrefix}LeftHandMiddle4`),
+        rightWrist.getObjectByName(`${bonePrefix}LeftHandRing1`),
+        rightWrist.getObjectByName(`${bonePrefix}LeftHandRing2`),
+        rightWrist.getObjectByName(`${bonePrefix}LeftHandRing3`),
+        rightWrist.getObjectByName(`${bonePrefix}LeftHandRing4`),
+        rightWrist.getObjectByName(`${bonePrefix}LeftHandPinky1`),
+        rightWrist.getObjectByName(`${bonePrefix}LeftHandPinky2`),
+        rightWrist.getObjectByName(`${bonePrefix}LeftHandPinky3`),
+        rightWrist.getObjectByName(`${bonePrefix}LeftHandPinky4`)
     ]
-    
+
+    prevLShoulderRot = leftShoulder.quaternion;
+    prevLElbowRot = leftElbow.quaternion;
+    prevLWristRot = rightWrist.quaternion;
+
     avatar.traverse(function(child) {
         if (child.isMesh) {
             child.castShadow = true;
@@ -169,58 +176,94 @@ export async function Avatar(name, loader) {
 export function setPose(poseLandmarks, poseWorldLandmarks) {
     let userJoints = [];
     poseWorldLandmarks.forEach((landmark) => {
-        userJoints.push(new THREE.Vector3(landmark.x, landmark.y, landmark.z).negate());
+        userJoints.push(new THREE.Vector3(landmark.x, landmark.y, landmark.z));
     });
 
-    let rightShoulderVis = poseWorldLandmarks[RIGHTSHOULDER].visibility;
-    let leftShoulderVis = poseWorldLandmarks[LEFTSHOULDER].visibility;
-    let rightHipVis = poseWorldLandmarks[RIGHTHIP].visibility;
-    let leftHipVis = poseWorldLandmarks[LEFTHIP].visibility;
+    let basisY = userJoints[LEFTSHOULDER].clone().sub(userJoints[RIGHTSHOULDER]).normalize();
+    let basisZ = userJoints[RIGHTSHOULDER].clone().lerp(userJoints[LEFTSHOULDER], 0.5).negate().normalize();
+    let basisX = basisZ.clone().cross(basisY).normalize();
 
-    // REQUIRED: both shoulders must be visible to track upperbody
-    if (rightShoulderVis > VISTHRESH && leftShoulderVis > VISTHRESH) {
-        // shoulder local coordinate system
-        // positive directions: x - leftShoulder -> rightShoulder,
-        //                      y - hip -> shoulder,
-        //                      z - user -> camera
-        let shoulderX = userJoints[RIGHTSHOULDER].clone().sub(userJoints[LEFTSHOULDER]).normalize();
-        let shoulderY = userJoints[RIGHTSHOULDER].clone().lerp(userJoints[LEFTSHOULDER], 0.5).normalize();
-        let shoulderZ = shoulderX.clone().cross(shoulderY).normalize();
+    let basis = new THREE.Matrix3().set(
+        basisX.x, basisY.x, basisZ.x,
+        basisX.y, basisY.y, basisZ.y,
+        basisX.z, basisY.z, basisZ.z
+    );
 
-        // torso direction
-        let thetaX = Math.acos(shoulderZ.x);
-        let thetaY = Math.acos(shoulderZ.y);
-        let thetaZ = Math.acos(shoulderY.x);
-        let rotX = thetaY - 1.2 * Math.PI / 2;
-        let rotY = - thetaX + Math.PI / 2;
-        let rotZ = thetaZ - Math.PI / 2;
-        smoothRotation(spine, rotX, rotY, rotZ);
+    let bone = userJoints[LEFTELBOW].clone().sub(userJoints[LEFTSHOULDER]).normalize();
+    let basisInv = basis.clone().invert();
+    bone.applyMatrix3(basisInv);
+    let rot = new THREE.Quaternion().setFromUnitVectors(new Vector3(0, 1, 0), bone).normalize();
+    prevLShoulderRot.slerp(rot, SMOOTHING);
+    leftShoulder.setRotationFromQuaternion(prevLShoulderRot);
+    prevLShoulderRot = leftShoulder.quaternion;
+    updateBasis(rot, basisX, basisY, basisZ, basis);
 
-        // left arm
-        // let xAxis = shoulderX.clone();
-        // let yAxis = shoulderY.clone();
-        // let zAxis = shoulderZ.clone();
-        let xAxis = shoulderZ.clone();
-        let yAxis = shoulderX.clone().negate();
-        let zAxis = shoulderY.clone().negate();
-        let basis = new THREE.Matrix3().set(
-            xAxis.x, yAxis.x, zAxis.x,
-            xAxis.y, yAxis.y, zAxis.y,
-            xAxis.z, yAxis.z, zAxis.z
-        );
+    bone = userJoints[LEFTWRIST].clone().sub(userJoints[LEFTELBOW]).normalize();
+    basisInv = basis.clone().invert();
+    bone.applyMatrix3(basisInv);
+    rot.setFromUnitVectors(new Vector3(0, 1, 0), bone).normalize();
+    prevLElbowRot.slerp(rot, SMOOTHING);
+    leftElbow.setRotationFromQuaternion(prevLElbowRot);
+    prevLElbowRot = leftElbow.quaternion;
+    updateBasis(rot, basisX, basisY, basisZ, basis);
 
-        let rot = rotateBone(userJoints[LEFTSHOULDER], userJoints[LEFTELBOW], leftElbowBone.position, basis);
-        leftShoulderBone.quaternion.slerp(rot, SMOOTHING);
-        updateBasis(leftShoulderBone.quaternion, xAxis, yAxis, zAxis, basis);
+    bone =  userJoints[LEFTINDEX].clone().lerp(userJoints[LEFTPINKY], 0.5).sub(userJoints[LEFTWRIST]).normalize();
+    basisInv = basis.clone().invert();
+    bone.applyMatrix3(basisInv);
+    rot.setFromUnitVectors(new Vector3(0, 1, 0), bone).normalize();
+    prevLWristRot.slerp(rot, SMOOTHING);
+    leftWrist.setRotationFromQuaternion(prevLWristRot);
+    prevLWristRot = leftWrist.quaternion;
 
-        // rot = rotateBone(userJoints[LEFTELBOW], userJoints[LEFTWRIST], leftWristBone.position, basis);
-        // leftElbowBone.quaternion.slerp(rot, SMOOTHING);
-        // updateBasis(leftElbowBone.quaternion, xAxis, yAxis, zAxis, basis);
+    // let rightShoulderVis = poseWorldLandmarks[RIGHTSHOULDER].visibility;
+    // let leftShoulderVis = poseWorldLandmarks[LEFTSHOULDER].visibility;
+    // let rightHipVis = poseWorldLandmarks[RIGHTHIP].visibility;
+    // let leftHipVis = poseWorldLandmarks[LEFTHIP].visibility;
+
+    // // REQUIRED: both shoulders must be visible to track upperbody
+    // if (rightShoulderVis > VISTHRESH && leftShoulderVis > VISTHRESH) {
+    //     // shoulder local coordinate system
+    //     // positive directions: x - leftShoulder -> rightShoulder,
+    //     //                      y - hip -> shoulder,
+    //     //                      z - user -> camera
+    //     let shoulderX = userJoints[RIGHTSHOULDER].clone().sub(userJoints[LEFTSHOULDER]).normalize();
+    //     let shoulderY = userJoints[RIGHTSHOULDER].clone().lerp(userJoints[LEFTSHOULDER], 0.5).normalize();
+    //     let shoulderZ = shoulderX.clone().cross(shoulderY).normalize();
+
+    //     // torso direction
+    //     let thetaX = Math.acos(shoulderZ.x);
+    //     let thetaY = Math.acos(shoulderZ.y);
+    //     let thetaZ = Math.acos(shoulderY.x);
+    //     let rotX = thetaY - 1.2 * Math.PI / 2;
+    //     let rotY = - thetaX + Math.PI / 2;
+    //     let rotZ = thetaZ - Math.PI / 2;
+    //     smoothRotation(spine, rotX, rotY, rotZ);
+
+    //     // left arm
+    //     // let xAxis = shoulderX.clone();
+    //     // let yAxis = shoulderY.clone();
+    //     // let zAxis = shoulderZ.clone();
+    //     let xAxis = shoulderZ.clone();
+    //     let yAxis = shoulderX.clone().negate();
+    //     let zAxis = shoulderY.clone().negate();
+    //     let basis = new THREE.Matrix3().set(
+    //         xAxis.x, yAxis.x, zAxis.x,
+    //         xAxis.y, yAxis.y, zAxis.y,
+    //         xAxis.z, yAxis.z, zAxis.z
+    //     );
+
+    //     let rot = rotate(userJoints[LEFTSHOULDER], userJoints[LEFTELBOW], leftElbow.position, basis);
+    //     leftShoulder.quaternion.slerp(rot, SMOOTHING);
+    //     updateBasis(leftShoulder.quaternion, xAxis, yAxis, zAxis, basis);
+
+        // rot = rotate(userJoints[LEFTELBOW], userJoints[LEFTWRIST], leftWrist.position, basis);
+        // leftElbow.quaternion.slerp(rot, SMOOTHING);
+        // updateBasis(leftElbow.quaternion, xAxis, yAxis, zAxis, basis);
 
         // let leftFingersUser = userJoints[LEFTPINKY].lerp(userJoints[LEFTINDEX], 0.5);
-        // let leftFingersAvatar = leftHandBones[PINKY1].position.clone().lerp(leftHandBones[INDEX1].position, 0.5);
-        // rot = rotateBone(userJoints[LEFTWRIST], leftFingersUser, leftFingersAvatar, basis);
-        // leftWristBone.quaternion.slerp(rot, SMOOTHING);
+        // let leftFingersAvatar = leftHands[PINKY1].position.clone().lerp(leftHands[INDEX1].position, 0.5);
+        // rot = rotate(userJoints[LEFTWRIST], leftFingersUser, leftFingersAvatar, basis);
+        // leftWrist.quaternion.slerp(rot, SMOOTHING);
 
         // right arm
         // xAxis = shoulderX.clone();
@@ -235,19 +278,19 @@ export function setPose(poseLandmarks, poseWorldLandmarks) {
         //     xAxis.z, yAxis.z, zAxis.z
         // );
 
-        // rot = rotateBone(userJoints[RIGHTSHOULDER], userJoints[RIGHTELBOW], rightElbowBone.position, basis);
-        // rightShoulderBone.quaternion.slerp(rot, SMOOTHING);
-        // updateBasis(rightShoulderBone.quaternion, xAxis, yAxis, zAxis, basis);
+        // rot = rotate(userJoints[RIGHTSHOULDER], userJoints[RIGHTELBOW], rightElbow.position, basis);
+        // rightShoulder.quaternion.slerp(rot, SMOOTHING);
+        // updateBasis(rightShoulder.quaternion, xAxis, yAxis, zAxis, basis);
 
-        // rot = rotateBone(userJoints[RIGHTELBOW], userJoints[RIGHTWRIST], rightWristBone.position, basis);
-        // rightElbowBone.quaternion.slerp(rot, SMOOTHING);
-        // updateBasis(rightElbowBone.quaternion, xAxis, yAxis, zAxis, basis);
+        // rot = rotate(userJoints[RIGHTELBOW], userJoints[RIGHTWRIST], rightWrist.position, basis);
+        // rightElbow.quaternion.slerp(rot, SMOOTHING);
+        // updateBasis(rightElbow.quaternion, xAxis, yAxis, zAxis, basis);
 
         // let rightFingersUser = userJoints[RIGHTPINKY].lerp(userJoints[RIGHTINDEX], 0.5);
-        // let rightFingersAvatar = rightHandBones[PINKY1].position.clone().lerp(rightHandBones[INDEX1].position, 0.5);
-        // rot = rotateBone(userJoints[RIGHTWRIST], rightFingersUser, rightFingersAvatar, basis);
-        // rightWristBone.quaternion.slerp(rot, SMOOTHING);
-    }
+        // let rightFingersAvatar = rightHands[PINKY1].position.clone().lerp(rightHands[INDEX1].position, 0.5);
+        // rot = rotate(userJoints[RIGHTWRIST], rightFingersUser, rightFingersAvatar, basis);
+        // rightWrist.quaternion.slerp(rot, SMOOTHING);
+    // }
 
     // // REQUIRED: both hips must be visible to track lowerbody
     // if (rightHipVis > VISTHRESH && leftHipVis > VISTHRESH) {
@@ -289,16 +332,16 @@ export function setPose(poseLandmarks, poseWorldLandmarks) {
     //         xAxis.z, yAxis.z, zAxis.z
     //     );
 
-    //     let rot = rotateBone(userJoints[LEFTHIP], userJoints[LEFTKNEE], leftKneeBone.position, basis);
-    //     leftHipBone.quaternion.slerp(rot, SMOOTHING);
-    //     updateBasis(leftHipBone.quaternion, xAxis, yAxis, zAxis, basis);
+    //     let rot = rotate(userJoints[LEFTHIP], userJoints[LEFTKNEE], leftKnee.position, basis);
+    //     leftHip.quaternion.slerp(rot, SMOOTHING);
+    //     updateBasis(leftHip.quaternion, xAxis, yAxis, zAxis, basis);
 
-    //     rot = rotateBone(userJoints[LEFTKNEE], userJoints[LEFTANKLE], leftAnkleBone.position, basis);
-    //     leftKneeBone.quaternion.slerp(rot, SMOOTHING);
-    //     updateBasis(leftKneeBone.quaternion, xAxis, yAxis, zAxis, basis);
+    //     rot = rotate(userJoints[LEFTKNEE], userJoints[LEFTANKLE], leftAnkle.position, basis);
+    //     leftKnee.quaternion.slerp(rot, SMOOTHING);
+    //     updateBasis(leftKnee.quaternion, xAxis, yAxis, zAxis, basis);
 
-    //     rot = rotateBone(userJoints[LEFTANKLE], userJoints[LEFTFOOT], leftFootBone.position, basis);
-    //     leftAnkleBone.quaternion.slerp(rot, SMOOTHING);
+    //     rot = rotate(userJoints[LEFTANKLE], userJoints[LEFTFOOT], leftFoot.position, basis);
+    //     leftAnkle.quaternion.slerp(rot, SMOOTHING);
 
     //     // right leg
     //     xAxis = hipX.clone();
@@ -310,29 +353,29 @@ export function setPose(poseLandmarks, poseWorldLandmarks) {
     //         xAxis.z, yAxis.z, zAxis.z
     //     );
 
-    //     rot = rotateBone(userJoints[RIGHTHIP], userJoints[RIGHTKNEE], rightKneeBone.position, basis);
-    //     rightHipBone.quaternion.slerp(rot, SMOOTHING);
-    //     updateBasis(rightHipBone.quaternion, xAxis, yAxis, zAxis, basis);
+    //     rot = rotate(userJoints[RIGHTHIP], userJoints[RIGHTKNEE], rightKnee.position, basis);
+    //     rightHip.quaternion.slerp(rot, SMOOTHING);
+    //     updateBasis(rightHip.quaternion, xAxis, yAxis, zAxis, basis);
 
-    //     rot = rotateBone(userJoints[RIGHTKNEE], userJoints[RIGHTANKLE], rightAnkleBone.position, basis);
-    //     rightKneeBone.quaternion.slerp(rot, SMOOTHING);
-    //     updateBasis(rightKneeBone.quaternion, xAxis, yAxis, zAxis, basis);
+    //     rot = rotate(userJoints[RIGHTKNEE], userJoints[RIGHTANKLE], rightAnkle.position, basis);
+    //     rightKnee.quaternion.slerp(rot, SMOOTHING);
+    //     updateBasis(rightKnee.quaternion, xAxis, yAxis, zAxis, basis);
 
-    //     rot = rotateBone(userJoints[RIGHTANKLE], userJoints[RIGHTFOOT], rightFootBone.position, basis);
-    //     rightAnkleBone.quaternion.slerp(rot, SMOOTHING);
+    //     rot = rotate(userJoints[RIGHTANKLE], userJoints[RIGHTFOOT], rightFoot.position, basis);
+    //     rightAnkle.quaternion.slerp(rot, SMOOTHING);
     // } else {
     //     // reset legs
-    //     leftHipBone.quaternion.identity();
-    //     leftKneeBone.quaternion.identity();
-    //     leftAnkleBone.quaternion.identity();
-    //     rightHipBone.quaternion.identity();
-    //     rightKneeBone.quaternion.identity();
-    //     rightAnkleBone.quaternion.identity();
+    //     leftHip.quaternion.identity();
+    //     leftKnee.quaternion.identity();
+    //     leftAnkle.quaternion.identity();
+    //     rightHip.quaternion.identity();
+    //     rightKnee.quaternion.identity();
+    //     rightAnkle.quaternion.identity();
     // }
 }
 
 export function setFingers(handLandmarks, isRight) {
-    let avatarBones = (isRight) ? rightHandBones : leftHandBones;
+    let avatars = (isRight) ? rightHands : leftHands;
 
     // hand landmark positions
     let userJoints = [];
@@ -364,7 +407,7 @@ export function setFingers(handLandmarks, isRight) {
 
     // iterate thumb joints
     for (let i = 1; i < 4; i++) {
-        let rot = rotateBone(userJoints[i], userJoints[i + 1], avatarBones[i + 1].position, basis);       
+        let rot = rotate(userJoints[i], userJoints[i + 1], avatars[i + 1].position, basis);       
         let angles = new THREE.Euler().setFromQuaternion(rot.normalize());
 
         // constrain finger rotation to x-axis, range [0, 90] degrees
@@ -372,10 +415,10 @@ export function setFingers(handLandmarks, isRight) {
         angleX = Math.max(0, angleX);
         angleX = Math.min(Math.PI / 2, angleX);
         
-        if (isRight) smoothRotation(avatarBones[i], angleX - 0.2 * Math.PI, 0, 0);
-        else smoothRotation(avatarBones[i], angleX, 0, 0);
+        if (isRight) smoothRotation(avatars[i], angleX - 0.2 * Math.PI, 0, 0);
+        else smoothRotation(avatars[i], angleX, 0, 0);
 
-        updateBasis(avatarBones[i].quaternion, xAxis, yAxis, zAxis, basis);
+        updateBasis(avatars[i].quaternion, xAxis, yAxis, zAxis, basis);
     }
 
     // iterate fingers
@@ -387,17 +430,17 @@ export function setFingers(handLandmarks, isRight) {
 
         // iterate finger joints
         for (let j = i; j < i + 3; j++) {
-            let rot = rotateBone(userJoints[j], userJoints[j + 1], avatarBones[j + 1].position, basis);
+            let rot = rotate(userJoints[j], userJoints[j + 1], avatars[j + 1].position, basis);
             
             // constrain finger rotation to z-axis, range [0, 90] degrees
             let angleZ = new THREE.Euler().setFromQuaternion(rot.normalize()).z;
             angleZ = Math.max(0, angleZ);
             angleZ = Math.min(Math.PI / 2, angleZ)
 
-            if (isRight) smoothRotation(avatarBones[j], 0, 0, -angleZ);
-            else smoothRotation(avatarBones[j], 0, 0, angleZ);
+            if (isRight) smoothRotation(avatars[j], 0, 0, -angleZ);
+            else smoothRotation(avatars[j], 0, 0, angleZ);
 
-            updateBasis(avatarBones[j].quaternion, xAxis, yAxis, zAxis, basis);
+            updateBasis(avatars[j].quaternion, xAxis, yAxis, zAxis, basis);
         }
     }
 }
@@ -447,7 +490,7 @@ export function setMorphs(faceLandmarks) {
     let rotX = -(thetaY - Math.PI / 2) - 0.1 * Math.PI;
     let rotY = thetaX - Math.PI / 2;
     let rotZ = -(thetaZ - Math.PI / 2);
-    smoothRotation(neckBone, rotX, rotY, rotZ);
+    smoothRotation(neck, rotX, rotY, rotZ);
 
     if (isMixamo) {
         // face plane local coordinates (pX, pY)
@@ -564,10 +607,10 @@ function smoothRotation(object, rotX, rotY, rotZ) {
 
 // userJoint (Vector3) - world position of joint
 // userChild (Vector3) - world position of child of joint
-// avatarChild (Vector3) - local position of child Bone of joint
+// avatarChild (Vector3) - local position of child bone of joint
 // basis (Matrix3) - local axes at joint (in world coordinates)
 // returns rotation needed at joint
-function rotateBone(userJoint, userChild, avatarChild, basis) {
+function rotate(userJoint, userChild, avatarChild, basis) {
     // change of basis: world -> local
     let userLimb = userChild.clone().sub(userJoint).applyMatrix3(basis.invert()).normalize();
     let avatarLimb = avatarChild.clone().normalize();
