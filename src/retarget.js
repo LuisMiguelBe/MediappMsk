@@ -8,7 +8,8 @@ export function retarget(tgtAvatar) {
     let Spine = tgtAvatar.getObjectByName("Spine");
     let Neck = Skeleton.getObjectByName("Head");
 
-    let LShoulder = Skeleton.getObjectByName("RightArm");
+    let LClavicle = Skeleton.getObjectByName("RightShoulder");
+    let LShoulder = LClavicle.getObjectByName("RightArm");
     let LElbow = LShoulder.getObjectByName("RightForeArm");
     let LWrist = LElbow.getObjectByName("RightHand");
     let RShoulder = Skeleton.getObjectByName("LeftArm");
@@ -74,41 +75,60 @@ export function retarget(tgtAvatar) {
 
     // left arm
     let srcAngles = leftShoulderBone.rotation;
-    LShoulder.setRotationFromEuler(new THREE.Euler(srcAngles.z, srcAngles.x, -srcAngles.y, 'XYZ'));
+    let angle = 90;
+    let x = constrainAngle(srcAngles.z, -angle, angle);
+    let y = constrainAngle(srcAngles.x, -angle, angle);
+    let z = constrainAngle(-srcAngles.y, -angle, angle);
+    LShoulder.setRotationFromEuler(new THREE.Euler(x, y, z, 'XYZ'));
+
     srcAngles = leftElbowBone.rotation;
-    LElbow.setRotationFromEuler(new THREE.Euler(srcAngles.z, srcAngles.x, -srcAngles.y, 'XYZ'));
-    srcAngles = leftWristBone.rotation;
-    LWrist.setRotationFromEuler(new THREE.Euler(srcAngles.z, srcAngles.x, -srcAngles.y, 'XYZ'));
+    x = constrainAngle(srcAngles.z, -angle, angle);
+    y = constrainAngle(srcAngles.x, -angle, angle);
+    z = constrainAngle(-srcAngles.y, -angle, angle);
+    LElbow.setRotationFromEuler(new THREE.Euler(x, y, z, 'XYZ'));
+    // srcAngles = leftWristBone.rotation;
+    // LWrist.setRotationFromEuler(new THREE.Euler(srcAngles.z, srcAngles.x, -srcAngles.y, 'XYZ'));
 
-    // left thumb
-    for (let i = 2; i < 5; i++) {
-        srcAngles = leftHandBones[i].rotation;
-        LHands[i].setRotationFromEuler(new THREE.Euler(0, 0, srcAngles.x, 'XYZ'));
-    }
+    // // left thumb
+    // for (let i = 2; i < 5; i++) {
+    //     srcAngles = leftHandBones[i].rotation;
+    //     LHands[i].setRotationFromEuler(new THREE.Euler(0, 0, srcAngles.x, 'XYZ'));
+    // }
 
-    // left fingers
-    for (let i = 5; i < LHands.length; i++) {
-        srcAngles = leftHandBones[i].rotation;
-        LHands[i].setRotationFromEuler(new THREE.Euler(srcAngles.z, 0, 0, 'XYZ'));
-    }
+    // // left fingers
+    // for (let i = 5; i < LHands.length; i++) {
+    //     srcAngles = leftHandBones[i].rotation;
+    //     LHands[i].setRotationFromEuler(new THREE.Euler(srcAngles.z, 0, 0, 'XYZ'));
+    // }
 
-    // right arm
-    srcAngles = rightShoulderBone.rotation;
-    RShoulder.setRotationFromEuler(new THREE.Euler(-srcAngles.z, -srcAngles.x, -srcAngles.y, 'XYZ'));
-    srcAngles = rightElbowBone.rotation;
-    RElbow.setRotationFromEuler(new THREE.Euler(-srcAngles.z, -srcAngles.x, -srcAngles.y, 'XYZ'));
-    srcAngles = rightWristBone.rotation;
-    RWrist.setRotationFromEuler(new THREE.Euler(-srcAngles.z, -srcAngles.x, -srcAngles.y, 'XYZ'));
+    // // right arm
+    // srcAngles = rightShoulderBone.rotation;
+    // RShoulder.setRotationFromEuler(new THREE.Euler(-srcAngles.z, -srcAngles.x, -srcAngles.y, 'XYZ'));
+    // srcAngles = rightElbowBone.rotation;
+    // RElbow.setRotationFromEuler(new THREE.Euler(-srcAngles.z, -srcAngles.x, -srcAngles.y, 'XYZ'));
+    // srcAngles = rightWristBone.rotation;
+    // RWrist.setRotationFromEuler(new THREE.Euler(-srcAngles.z, -srcAngles.x, -srcAngles.y, 'XYZ'));
 
-    // right thumb
-    for (let i = 2; i < 5; i++) {
-        srcAngles = rightHandBones[i].rotation;
-        RHands[i].setRotationFromEuler(new THREE.Euler(0, 0, -srcAngles.x, 'XYZ'));
-    }
+    // // right thumb
+    // for (let i = 2; i < 5; i++) {
+    //     srcAngles = rightHandBones[i].rotation;
+    //     RHands[i].setRotationFromEuler(new THREE.Euler(0, 0, -srcAngles.x, 'XYZ'));
+    // }
 
-    // right fingers
-    for (let i = 5; i < RHands.length; i++) {
-        srcAngles = rightHandBones[i].rotation;
-        RHands[i].setRotationFromEuler(new THREE.Euler(-srcAngles.z, 0, 0, 'XYZ'));
-    }
+    // // right fingers
+    // for (let i = 5; i < RHands.length; i++) {
+    //     srcAngles = rightHandBones[i].rotation;
+    //     RHands[i].setRotationFromEuler(new THREE.Euler(-srcAngles.z, 0, 0, 'XYZ'));
+    // }
+}
+
+function constrainAngle(angle, low, high) {
+    angle = angle * 180 / Math.PI;
+
+    while (angle > 180) angle -= 360;
+    while (angle < -180) angle += 360;
+
+    angle = Math.max(low, Math.min(high, angle));
+
+    return angle * Math.PI / 180;
 }
