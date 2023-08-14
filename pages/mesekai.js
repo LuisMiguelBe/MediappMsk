@@ -61,9 +61,9 @@ export default function Avatar() {
                                     onClick={updateAvatar.bind(this, "malcolm")}>
                             Malcolm
                             </Button>
-                            <Button style={{background: `url('thumbnails/avatar/korean.png')`,
+                            <Button style={{background: `url('thumbnails/avatar/Korean.png')`,
                                             backgroundPosition: 'center'}} 
-                                    onClick={updateAvatar.bind(this, "korean")}>
+                                    onClick={updateAvatar.bind(this, "demon")}>
                             Korean
                             </Button>
                             <Button style={{background: `url('thumbnails/avatar/remy.png')`,
