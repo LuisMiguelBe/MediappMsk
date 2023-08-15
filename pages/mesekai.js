@@ -48,7 +48,7 @@ export default function Avatar() {
                             </Button>
                             <Button style={{background: `url('thumbnails/avatar/ybot.png')`,
                                             backgroundPosition: 'center'}} 
-                                    onClick={updateAvatar.bind(this, "ybot")}>
+                                    onClick={updateAvatar.bind(this, "humanoid")}>
                             Y Bot
                             </Button>
                             <Button style={{background: `url('thumbnails/avatar/liam.png')`,
@@ -63,7 +63,7 @@ export default function Avatar() {
                             </Button>
                             <Button style={{background: `url('thumbnails/avatar/sam.png')`,
                                             backgroundPosition: 'center'}} 
-                                    onClick={updateAvatar.bind(this, "humanoid")}>
+                                    onClick={updateAvatar.bind(this, "malcom")}>
                             Korean
                             </Button>
                             <Button style={{background: `url('thumbnails/avatar/remy.png')`,
