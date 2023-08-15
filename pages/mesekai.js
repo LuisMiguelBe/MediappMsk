@@ -46,7 +46,7 @@ export default function Avatar() {
                                     onClick={updateAvatar.bind(this, "xbot")}>
                             X Bot
                             </Button>
-                            <Button style={{background: `url('thumbnails/avatar/ybot.png')`,
+                            <Button style={{background: `url('thumbnails/avatar/xbot.png')`,
                                             backgroundPosition: 'center'}} 
                                     onClick={updateAvatar.bind(this, "humanoid")}>
                             Y Bot
