@@ -39,7 +39,7 @@ export async function init(canvas, currUser) {
     loader = new FBXLoader();
 
     let avatarName = "ybot";
-    let worldName = "grid";
+    let worldName = "Spacee";
 
     // TODO: use database fields for initial avatar and world
     // if (currUser) {
