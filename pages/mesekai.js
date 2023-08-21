@@ -63,7 +63,7 @@ export default function Avatar() {
                             </Button>
                             <Button style={{background: `url('thumbnails/avatar/sam.png')`,
                                             backgroundPosition: 'center'}} 
-                                    onClick={updateAvatar.bind(this, "girlbot_glb")}>    
+                                    onClick={updateAvatar.bind(this, "Girlbot3")}>    
                             Korean
                             </Button>
                             <Button style={{background: `url('thumbnails/avatar/remy.png')`,
