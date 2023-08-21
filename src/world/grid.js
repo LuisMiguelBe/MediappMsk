@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-const skyColor = 0xA0A0A0;
+const skyColor = #0a0a0a;
 const groundColor = #0a0a0a;
 
 export function Grid(worldDim) {
