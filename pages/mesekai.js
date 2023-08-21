@@ -46,64 +46,7 @@ export default function Avatar() {
                                     onClick={updateAvatar.bind(this, "xbot")}>
                             X Bot
                             </Button>
-                            <Button style={{background: `url('thumbnails/avatar/xbot.png')`,
-                                            backgroundPosition: 'center'}} 
-                                    onClick={updateAvatar.bind(this, "humanoid")}>
-                            Y Bot
-                            </Button>
-                            <Button style={{background: `url('thumbnails/avatar/liam.png')`,
-                                            backgroundPosition: 'center'}} 
-                                    onClick={updateAvatar.bind(this, "liam")}>
-                            Liam
-                            </Button>
-                            <Button style={{background: `url('thumbnails/avatar/malcolm.png')`,
-                                            backgroundPosition: 'center'}} 
-                                    onClick={updateAvatar.bind(this, "malcolm")}> 
-                            Malcolm
-                            </Button>
-                            <Button style={{background: `url('thumbnails/avatar/sam.png')`,
-                                            backgroundPosition: 'center'}} 
-                                    onClick={updateAvatar.bind(this, "Botposed")}>      
-                            Korean
-                            </Button>
-                            <Button style={{background: `url('thumbnails/avatar/remy.png')`,
-                                            backgroundPosition: 'center'}} 
-                                    onClick={updateAvatar.bind(this, "xbot")}>
-                            Remy
-                            </Button>
-                            <Button style={{background: `url('thumbnails/avatar/shae.png')`,
-                                            backgroundPosition: 'center'}} 
-                                    onClick={updateAvatar.bind(this, "shae")}>
-                            Shae
-                            </Button>
-                          
-                        </TabPane>
-                        <TabPane tab="Worlds" key="2" type="card">
-                            <Button style={{background: `url('thumbnails/world/grid.png')`,
-                                            backgroundPosition: 'center'}} 
-                                    onClick={updateWorld.bind(this, "grid")}>
-                            Grid
-                            </Button>
-                            <Button style={{background: `url('thumbnails/world/house.png')`,
-                                            backgroundPosition: 'center'}} 
-                                    onClick={updateWorld.bind(this, "house")}>
-                            House
-                            </Button>
-                            <Button style={{background: `url('thumbnails/world/forest.png')`,
-                                            backgroundPosition: 'center'}} 
-                                    onClick={updateWorld.bind(this, "forest")}>
-                            Forest
-                            </Button>
-                            <Button style={{background: `url('thumbnails/world/castle.png')`,
-                                            backgroundPosition: 'center'}} 
-                                    onClick={updateWorld.bind(this, "castle")}>
-                            Castle
-                            </Button>
-                            <Button style={{background: `url('thumbnails/world/space.png')`,
-                                            backgroundPosition: 'center'}} 
-                                    onClick={updateWorld.bind(this, "space station")}>
-                            Space
-                            </Button>
+                           
                         </TabPane>
                     </Tabs>
                 </Col>
