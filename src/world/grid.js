@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 const skyColor = 0xA0A0A0;
-const groundColor = 0x999999;
+const groundColor = #0a0a0a;
 
 export function Grid(worldDim) {
     let world = new THREE.Object3D();
