@@ -68,7 +68,7 @@ export default function Avatar() {
                             </Button>
                             <Button style={{background: `url('thumbnails/avatar/remy.png')`,
                                             backgroundPosition: 'center'}} 
-                                    onClick={updateAvatar.bind(this, "remy")}>
+                                    onClick={updateAvatar.bind(this, "xbot")}>
                             Remy
                             </Button>
                             <Button style={{background: `url('thumbnails/avatar/shae.png')`,
@@ -76,11 +76,7 @@ export default function Avatar() {
                                     onClick={updateAvatar.bind(this, "shae")}>
                             Shae
                             </Button>
-                            <Button style={{background: `url('thumbnails/avatar/stefani.png')`,
-                                            backgroundPosition: 'center'}} 
-                                    onClick={updateAvatar.bind(this, "stefani")}>
-                            Stefani
-                            </Button>
+                          
                         </TabPane>
                         <TabPane tab="Worlds" key="2" type="card">
                             <Button style={{background: `url('thumbnails/world/grid.png')`,
