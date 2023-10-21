@@ -50,7 +50,7 @@ let leftHandBones, rightHandBones;
 const eyelashNames = ["default", "Eyelashes", "Ch22_Eyelashes"];
 
 export async function Avatar(name, loader) {
-   /////////////////////////////////////////////////////////////////////////////////////////////////////// let avatar = await loader.loadAsync(`/avatars/${name}.fbx`);
+   //////////////////////////////////////////////////////////////////////////////////////////////////////// let avatar = await loader.loadAsync(`/avatars/${name}.fbx`);
     let avatarURL = "https://cdn.glitch.global/6a60c94e-ec54-4cd0-aa95-0c044bf730aa/WalKK.fbx?v=1697870377907" + name + ".fbx";
     let avatar = await loader.loadAsync(avatarURL);
     
