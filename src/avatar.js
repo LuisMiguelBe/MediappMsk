@@ -4,7 +4,7 @@ import * as THREE from 'three';
 const WIDTH = 1920;
 const HEIGHT = 1080;
 
-const SMOOTHING = 0.25;
+const SMOOTHING = 0.05;
 const VISTHRESH = 0.9;
 
 // pose constants
