@@ -50,7 +50,9 @@ let leftHandBones, rightHandBones;
 const eyelashNames = ["default", "Eyelashes", "Ch22_Eyelashes"];
 
 export async function Avatar(name, loader) {
-    let avatar = await loader.loadAsync(`/avatars/${name}.fbx`);
+   /////////////////////////////////////////////////////////////////////////////////////////////////////// let avatar = await loader.loadAsync(`/avatars/${name}.fbx`);
+    let avatarURL = "https://example.com/avatars/" + name + ".fbx";
+    let avatar = await loader.loadAsync(avatarURL);
     
     // Skinned Mesh
     let skinnedMesh = avatar.getObjectByName("Body");
