@@ -22,7 +22,7 @@ export async function init(canvas, currUser) {
     renderer = new THREE.WebGLRenderer({antialias: true});
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(canvasWidthOffset * window.innerWidth, window.innerHeight);
-    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.enabled = false;  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     canvas.appendChild(renderer.domElement);
 
     // camera
