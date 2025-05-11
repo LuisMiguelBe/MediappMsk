@@ -314,10 +314,76 @@ function resetLegs() {
     if (rightAnkleBone) rightAnkleBone.rotation.set(0, 0, 0);
 }
 
+// Add head rotation constraints (in radians)
+const HEAD_CONSTRAINTS = {
+    YAW: Math.PI / 4,   // ±45° left/right
+    PITCH: Math.PI / 6, // ±30° up/down
+    ROLL: Math.PI / 9   // ±20° tilt
+};
+
+// Helper function to compute head orientation from face landmarks
+function computeHeadOrientation(faceLandmarks) {
+    if (!faceLandmarks) return new THREE.Quaternion();
+
+    // Define head coordinate system
+    const leftEye = new THREE.Vector3(
+        faceLandmarks[FACE_INDICES.LEFT_EYE].x,
+        faceLandmarks[FACE_INDICES.LEFT_EYE].y,
+        -faceLandmarks[FACE_INDICES.LEFT_EYE].z // Flip z-axis to match THREE.js
+    );
+    const rightEye = new THREE.Vector3(
+        faceLandmarks[FACE_INDICES.RIGHT_EYE].x,
+        faceLandmarks[FACE_INDICES.RIGHT_EYE].y,
+        -faceLandmarks[FACE_INDICES.RIGHT_EYE].z
+    );
+    const nose = new THREE.Vector3(
+        faceLandmarks[FACE_INDICES.NOSE].x,
+        faceLandmarks[FACE_INDICES.NOSE].y,
+        -faceLandmarks[FACE_INDICES.NOSE].z
+    );
+    const forehead = new THREE.Vector3(
+        faceLandmarks[FACE_INDICES.FOREHEAD].x,
+        faceLandmarks[FACE_INDICES.FOREHEAD].y,
+        -faceLandmarks[FACE_INDICES.FOREHEAD].z
+    );
+
+    // Compute axes
+    const xAxis = rightEye.clone().sub(leftEye).normalize(); // Left to right
+    const yAxis = forehead.clone().sub(nose).normalize();    // Nose to forehead
+    const zAxis = xAxis.clone().cross(yAxis).normalize();    // Forward direction
+    const adjustedYAxis = zAxis.clone().cross(xAxis).normalize(); // Recalculate Y for orthogonality
+
+    // Create rotation matrix
+    const matrix = new THREE.Matrix4().makeBasis(xAxis, adjustedYAxis, zAxis);
+    const quaternion = new THREE.Quaternion().setFromRotationMatrix(matrix);
+
+    // Extract Euler angles to apply constraints
+    const euler = new THREE.Euler().setFromQuaternion(quaternion, 'YXZ');
+    euler.y = Math.max(-HEAD_CONSTRAINTS.YAW, Math.min(HEAD_CONSTRAINTS.YAW, euler.y));     // Yaw
+    euler.x = Math.max(-HEAD_CONSTRAINTS.PITCH, Math.min(HEAD_CONSTRAINTS.PITCH, euler.x)); // Pitch
+    euler.z = Math.max(-HEAD_CONSTRAINTS.ROLL, Math.min(HEAD_CONSTRAINTS.ROLL, euler.z));   // Roll
+
+    // Convert back to quaternion
+    return new THREE.Quaternion().setFromEuler(euler);
+}
+
+// Updated setFace function to include head rotation
 export function setFace(faceLandmarks) {
     if (!morphTargets || !morphDict || !faceLandmarks) return;
 
-    // Enhanced face morph targets mapping with normalized distances
+    // Head rotation
+    if (neckBone) {
+        const headQuat = computeHeadOrientation(faceLandmarks);
+        smoothRotation(
+            neckBone,
+            headQuat.x,
+            headQuat.y,
+            headQuat.z,
+            'neck'
+        );
+    }
+
+    // Existing facial morph targets logic
     const faceMorphMapping = {
         eyeBlinkLeft: () => {
             const eyeTop = faceLandmarks[FACE_INDICES.FOREHEAD].y;
@@ -347,7 +413,6 @@ export function setFace(faceLandmarks) {
         }
     };
 
-    // Apply morph targets
     for (const [morphTarget, calcValue] of Object.entries(faceMorphMapping)) {
         const index = morphDict[morphTarget];
         if (index !== undefined) {
@@ -356,48 +421,23 @@ export function setFace(faceLandmarks) {
     }
 }
 
-export function setHand(handLandmarks, left) {
-    if (!handLandmarks) return;
+// Ensure smoothRotation handles quaternions correctly
+function smoothRotation(bone, rotX, rotY, rotZ, boneKey) {
+    if (!bone) return;
 
-    const handBones = left ? leftHandBones : rightHandBones;
-    if (!handBones || handBones.length === 0) return;
-
-    // Wrist orientation
-    const wrist = new THREE.Vector3(handLandmarks[HAND_INDICES.WRIST].x, handLandmarks[HAND_INDICES.WRIST].y, -handLandmarks[HAND_INDICES.WRIST].z);
-    const index = new THREE.Vector3(handLandmarks[HAND_INDICES.INDEX1].x, handLandmarks[HAND_INDICES.INDEX1].y, -handLandmarks[HAND_INDICES.INDEX1].z);
-    const pinky = new THREE.Vector3(handLandmarks[HAND_INDICES.PINKY1].x, handLandmarks[HAND_INDICES.PINKY1].y, -handLandmarks[HAND_INDICES.PINKY1].z);
-    const handDir = index.clone().sub(wrist).normalize();
-    const handNormal = pinky.clone().sub(wrist).normalize().cross(handDir).normalize();
-    const handUp = handDir.clone().cross(handNormal).normalize();
-
-    const wristMatrix = new THREE.Matrix4().makeBasis(handDir, handUp, handNormal);
-    const wristQuat = new THREE.Quaternion().setFromRotationMatrix(wristMatrix);
-    smoothRotation(handBones[0], wristQuat.x, wristQuat.y, wristQuat.z, `${left ? 'left' : 'right'}_wrist`);
-
-    // Finger rotations (simplified IK for fingers)
-    const fingerIndices = [
-        { start: HAND_INDICES.INDEX1, bones: [5, 6, 7, 8], name: 'index' },
-        { start: HAND_INDICES.MIDDLE1, bones: [9, 10, 11, 12], name: 'middle' },
-        { start: HAND_INDICES.RING1, bones: [13, 14, 15, 16], name: 'ring' },
-        { start: HAND_INDICES.PINKY1, bones: [17, 18, 19, 20], name: 'pinky' }
-    ];
-
-    fingerIndices.forEach(finger => {
-        const target = new THREE.Vector3(handLandmarks[finger.start].x, handLandmarks[finger.start].y, -handLandmarks[finger.start].z);
-        const dir = target.clone().sub(wrist).normalize();
-        finger.bones.forEach((boneIdx, i) => {
-            if (handBones[boneIdx]) {
-                const angle = Math.min(Math.PI / 4, dir.angleTo(handDir) * (i + 1) * 0.5); // Gradual bending
-                smoothRotation(handBones[boneIdx], 0, angle, 0, `${left ? 'left' : 'right'}_${finger.name}_${i}`);
-            }
-        });
-    });
-
-    // Thumb (special case due to different orientation)
-    if (handBones[1]) {
-        const thumbTarget = new THREE.Vector3(handLandmarks[1].x, handLandmarks[1].y, -handLandmarks[1].z);
-        const thumbDir = thumbTarget.clone().sub(wrist).normalize();
-        const thumbAngle = Math.min(Math.PI / 3, thumbDir.angleTo(handDir));
-        smoothRotation(handBones[1], thumbAngle, 0, 0, `${left ? 'left' : 'right'}_thumb`);
+    if (!boneRotations.has(boneKey)) {
+        boneRotations.set(boneKey, { x: bone.rotation.x, y: bone.rotation.y, z: bone.rotation.z });
     }
+
+    const prev = boneRotations.get(boneKey);
+    const targetQuat = new THREE.Quaternion(rotX, rotY, rotZ, 1).normalize();
+    const prevQuat = new THREE.Quaternion(prev.x, prev.y, prev.z, 1).normalize();
+
+    // Slerp for smooth quaternion interpolation
+    const smoothedQuat = prevQuat.slerp(targetQuat, SMOOTHING);
+    bone.quaternion.copy(smoothedQuat);
+
+    // Update stored rotation (store Euler for consistency with other bones)
+    const euler = new THREE.Euler().setFromQuaternion(smoothedQuat, 'XYZ');
+    boneRotations.set(boneKey, { x: euler.x, y: euler.y, z: euler.z });
 }
